@@ -6,14 +6,14 @@
     <title>Soumik Online Store - Digital Services</title>
     <style>
         :root {
-            --primary: #7c3aed;
-            --primary-dark: #6d28d9;
-            --accent-gradient: linear-gradient(135deg, #7c3aed 0%, #db2777 100%);
-            --bg-dark: #0f1016;
-            --card-bg: #181924;
-            --card-border: #2a2b3d;
-            --text-light: #f3f4f6;
-            --text-muted: #9ca3af;
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --accent-gradient: linear-gradient(135deg, #8b5cf6 0%, #ec4899 50%, #3b82f6 100%);
+            --bg-dark: #05060a;
+            --card-bg: rgba(16, 18, 27, 0.75);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --text-light: #f8fafc;
+            --text-muted: #94a3b8;
             --warning: #f59e0b;
             --danger: #ef4444;
         }
@@ -31,79 +31,196 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
         }
 
-        /* --- Auth Portal Styles --- */
+        /* --- Ultra Cinematic Auth Portal Background --- */
+        #auth-view {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: radial-gradient(circle at center, #130c22 0%, #05060a 100%);
+        }
+
+        .auth-bg-orbs {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.55;
+            animation: moveOrb 14s infinite alternate ease-in-out;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: #8b5cf6;
+            top: -15%;
+            left: -10%;
+        }
+
+        .orb-2 {
+            width: 550px;
+            height: 550px;
+            background: #ec4899;
+            bottom: -20%;
+            right: -10%;
+            animation-delay: 4s;
+        }
+
+        .orb-3 {
+            width: 400px;
+            height: 400px;
+            background: #3b82f6;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 8s;
+        }
+
+        @keyframes moveOrb {
+            0% { transform: translateY(0px) scale(1) rotate(0deg); }
+            100% { transform: translateY(50px) scale(1.2) rotate(20deg); }
+        }
+
+        /* Ambient Dynamic Floating Texts */
+        .ambient-text-layer {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+            opacity: 0.07;
+            overflow: hidden;
+        }
+
+        .ambient-row {
+            white-space: nowrap;
+            font-size: 34px;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            color: #ffffff;
+            animation: scrollText 35s linear infinite;
+        }
+
+        .ambient-row:nth-child(even) {
+            animation-direction: reverse;
+            animation-duration: 40s;
+        }
+
+        @keyframes scrollText {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
         .auth-container {
             max-width: 440px;
-            margin: 60px auto;
-            background: linear-gradient(145deg, #181924, #222433);
-            padding: 35px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
-            border: 1px solid rgba(124, 58, 237, 0.3);
+            width: 90%;
+            margin: 20px auto;
+            background: rgba(14, 16, 26, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 40px;
+            border-radius: 28px;
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.85), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(139, 92, 246, 0.35);
+            position: relative;
+            z-index: 10;
+            animation: fadeInCard 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes fadeInCard {
+            0% { opacity: 0; transform: translateY(20px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .auth-header {
             text-align: center;
-            margin-bottom: 25px;
+            margin-bottom: 30px;
         }
 
         .auth-header h2 {
             background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 28px;
-            margin-bottom: 5px;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             position: relative;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 12px 40px 12px 14px;
-            background: #0f1016;
-            border: 1px solid #2a2b3d;
-            border-radius: 10px;
+            padding: 14px 45px 14px 16px;
+            background: rgba(8, 9, 14, 0.85);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
             color: white;
             font-size: 15px;
             outline: none;
-            transition: 0.3s;
+            transition: all 0.3s ease;
         }
 
         .form-group input:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 8px rgba(124, 58, 237, 0.4);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.45);
+            background: rgba(8, 9, 14, 0.98);
         }
 
         .toggle-password {
             position: absolute;
-            right: 12px;
-            top: 38px;
+            right: 15px;
+            top: 40px;
             cursor: pointer;
             user-select: none;
             font-size: 18px;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .toggle-password:hover {
+            opacity: 1;
         }
 
         .forgot-pass-link {
             display: block;
             text-align: right;
             margin-top: -10px;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             font-size: 13px;
             color: #c084fc;
             text-decoration: none;
             cursor: pointer;
+            font-weight: 500;
         }
 
         .forgot-pass-link:hover {
@@ -112,26 +229,27 @@
 
         .btn {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             border: none;
-            border-radius: 10px;
+            border-radius: 14px;
             background: var(--accent-gradient);
             color: white;
             font-weight: bold;
             font-size: 16px;
             cursor: pointer;
-            transition: 0.3s ease;
-            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.45);
         }
 
         .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
+            opacity: 0.95;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(139, 92, 246, 0.65);
         }
 
         .auth-toggle-text {
             text-align: center;
-            margin-top: 15px;
+            margin-top: 22px;
             color: var(--text-muted);
             font-size: 14px;
         }
@@ -143,6 +261,10 @@
             cursor: pointer;
         }
 
+        .auth-toggle-text a:hover {
+            text-decoration: underline;
+        }
+
         /* --- Dashboard Layout --- */
         #dashboard-view {
             display: none;
@@ -151,7 +273,8 @@
         }
 
         header {
-            background: var(--card-bg);
+            background: rgba(14, 15, 23, 0.9);
+            backdrop-filter: blur(15px);
             padding: 15px 5%;
             display: flex;
             justify-content: space-between;
@@ -164,7 +287,7 @@
 
         .brand-logo {
             font-size: 22px;
-            font-weight: bold;
+            font-weight: 800;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -181,8 +304,8 @@
         }
 
         .profile-icon {
-            width: 45px;
-            height: 45px;
+            width: 48px;
+            height: 48px;
             background: var(--accent-gradient);
             border-radius: 50%;
             display: flex;
@@ -190,25 +313,28 @@
             justify-content: center;
             font-size: 22px;
             cursor: pointer;
-            border: 2px solid #2a2b3d;
-            transition: 0.3s;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            transition: all 0.3s ease;
         }
 
         .profile-icon:hover {
-            transform: scale(1.05);
+            transform: scale(1.08);
+            border-color: #fff;
         }
 
         .profile-dropdown {
             display: none;
             position: absolute;
             right: 0;
-            top: 55px;
+            top: 60px;
             width: 280px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            padding: 15px;
+            background: rgba(18, 20, 32, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+            padding: 18px;
             z-index: 200;
         }
 
@@ -217,15 +343,15 @@
         }
 
         .profile-info {
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 10px;
-            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 12px;
+            margin-bottom: 12px;
         }
 
         .profile-info p {
             font-size: 13px;
             color: var(--text-muted);
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             word-break: break-all;
         }
 
@@ -235,30 +361,43 @@
 
         .dropdown-btn {
             width: 100%;
-            padding: 8px 12px;
-            margin-top: 6px;
+            padding: 10px 14px;
+            margin-top: 8px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 13px;
             font-weight: bold;
             text-align: left;
+            transition: all 0.2s ease;
         }
 
-        .btn-change-pass {
-            background: #2a2b3d;
+        .btn-password-change {
+            background: rgba(139, 92, 246, 0.2);
+            color: #c084fc;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-password-change:hover {
+            background: rgba(139, 92, 246, 0.35);
             color: white;
         }
 
         .btn-logout {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-logout:hover {
             background: var(--danger);
             color: white;
         }
 
-        /* Hero Section with Auto Image Slider */
+        /* Hero Section */
         .hero {
-            background: linear-gradient(135deg, #13121d 0%, #29153a 100%);
-            padding: 40px 5%;
+            background: linear-gradient(135deg, #10111a 0%, #201035 100%);
+            padding: 50px 5%;
             display: flex;
             flex-wrap: wrap;
             align-items: center;
@@ -273,39 +412,47 @@
         }
 
         .logo-3d {
-            font-size: 36px;
+            font-size: 38px;
             font-weight: 900;
             text-transform: uppercase;
             background: var(--accent-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
 
         .hero h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
+            font-size: 26px;
+            margin-bottom: 12px;
             color: white;
+            font-weight: 700;
         }
 
         .hero p {
             color: var(--text-muted);
             font-size: 14px;
-            margin-bottom: 20px;
-            line-height: 1.5;
+            margin-bottom: 25px;
+            line-height: 1.6;
         }
 
-        /* Auto Slider Box */
-        .hero-slider-box {
+        .hero-showcase-box {
             flex: 1;
-            min-width: 280px;
-            max-width: 450px;
-            height: 240px;
-            border-radius: 16px;
+            min-width: 300px;
+            max-width: 480px;
+            background: rgba(20, 21, 33, 0.9);
+            border: 2px solid rgba(139, 92, 246, 0.4);
+            border-radius: 20px;
             overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .slider-container {
+            width: 100%;
+            height: 280px;
             position: relative;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            border: 2px solid rgba(124, 58, 237, 0.4);
+            overflow: hidden;
         }
 
         .slider-img {
@@ -323,27 +470,110 @@
             opacity: 1;
         }
 
-        .quick-actions {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
+        .slider-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            color: #c084fc;
+            padding: 6px 14px;
+            font-size: 11px;
+            font-weight: bold;
+            border-radius: 20px;
+            border: 1px solid rgba(192, 132, 252, 0.3);
+            z-index: 10;
         }
 
-        .action-btn {
-            padding: 8px 16px;
-            border-radius: 30px;
-            text-decoration: none;
+        /* --- Quick Contact Section --- */
+        .quick-contact-strip {
+            background: #0d0e15;
+            border-bottom: 1px solid var(--card-border);
+            padding: 25px 5%;
+        }
+
+        .quick-contact-container {
+            max-width: 900px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .quick-contact-title {
+            font-size: 16px;
             color: white;
-            font-weight: bold;
-            font-size: 13px;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            font-weight: 600;
         }
 
-        .bg-whatsapp { background: #25D366; }
-        .bg-call { background: #0284c7; }
-        .bg-email { background: #ea580c; }
+        .quick-contact-icons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .icon-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(20, 21, 33, 0.8);
+            border: 1px solid var(--card-border);
+            padding: 14px 24px;
+            border-radius: 12px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            min-width: 220px;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .icon-action-btn svg {
+            width: 26px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+
+        .icon-action-btn .label-box {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .icon-action-btn span.title {
+            font-size: 15px;
+            font-weight: bold;
+            color: white;
+        }
+
+        .icon-action-btn span.label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .icon-action-btn.whatsapp:hover {
+            background: rgba(37, 211, 102, 0.15);
+            border-color: #25D366;
+            transform: translateY(-2px);
+        }
+
+        .icon-action-btn.call:hover {
+            background: rgba(2, 132, 199, 0.15);
+            border-color: #0284c7;
+            transform: translateY(-2px);
+        }
+
+        .icon-action-btn.email:hover {
+            background: rgba(219, 39, 119, 0.15);
+            border-color: #db2777;
+            transform: translateY(-2px);
+        }
 
         /* Services Grid */
         .main-content {
@@ -356,6 +586,7 @@
             margin-bottom: 20px;
             border-left: 4px solid var(--primary);
             padding-left: 10px;
+            font-weight: 700;
         }
 
         .services-grid {
@@ -365,23 +596,40 @@
             margin-bottom: 40px;
         }
 
+        .coming-soon-section {
+            background: linear-gradient(135deg, rgba(20, 21, 33, 0.5) 0%, rgba(35, 18, 55, 0.4) 100%);
+            border: 1px dashed rgba(245, 158, 11, 0.4);
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 40px;
+        }
+
+        .coming-soon-title {
+            font-size: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--warning);
+            padding-left: 10px;
+            color: var(--warning);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+        }
+
         .service-card {
-            background: var(--card-bg);
+            background: rgba(20, 21, 33, 0.8);
             border: 1px solid var(--card-border);
-            border-radius: 12px;
+            border-radius: 14px;
             padding: 20px;
             text-align: center;
-            transition: 0.3s;
+            transition: all 0.3s ease;
             position: relative;
         }
 
         .service-card:hover {
             transform: translateY(-5px);
             border-color: var(--primary);
-        }
-
-        .service-card.coming-soon {
-            opacity: 0.7;
+            box-shadow: 0 10px 25px rgba(139, 92, 246, 0.2);
         }
 
         .badge-cs {
@@ -397,20 +645,23 @@
         }
 
         .service-card h3 {
-            font-size: 16px;
-            margin-bottom: 12px;
+            font-size: 15px;
+            margin-bottom: 14px;
+            font-weight: 600;
         }
 
         .service-card button {
-            padding: 8px 15px;
-            border-radius: 6px;
+            display: inline-block;
+            padding: 9px 15px;
+            border-radius: 8px;
             border: none;
             background: var(--primary);
             color: white;
             cursor: pointer;
             font-size: 13px;
+            font-weight: 600;
             width: 100%;
-            transition: 0.2s;
+            transition: all 0.2s ease;
         }
 
         .service-card button:hover {
@@ -422,7 +673,8 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
             align-items: center;
             justify-content: center;
             z-index: 1000;
@@ -433,35 +685,29 @@
         }
 
         .modal-body {
-            background: var(--card-bg);
-            border-radius: 14px;
+            background: rgba(18, 20, 32, 0.95);
+            border-radius: 18px;
             padding: 30px;
             width: 90%;
             max-width: 600px;
-            border: 1px solid var(--card-border);
+            border: 1px solid rgba(139, 92, 246, 0.3);
             max-height: 85vh;
             overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8);
         }
 
         .modal-body h3 {
             margin-bottom: 15px;
             color: #c084fc;
             font-size: 22px;
+            font-weight: 700;
         }
 
-        .modal-body p, .modal-body ul {
+        .modal-body p {
             color: var(--text-muted);
             font-size: 14px;
             line-height: 1.8;
             margin-bottom: 15px;
-        }
-
-        .modal-body ul {
-            padding-left: 20px;
-        }
-
-        .modal-body li {
-            margin-bottom: 8px;
         }
 
         .link-list {
@@ -474,37 +720,44 @@
         .link-item {
             display: block;
             padding: 12px;
-            background: #0f1016;
+            background: #0a0b10;
             color: white;
             text-decoration: none;
-            border-radius: 8px;
-            border: 1px solid #2a2b3d;
-            transition: 0.2s;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.2s ease;
             text-align: center;
             font-weight: bold;
+            word-break: break-all;
         }
 
         .link-item:hover {
             border-color: var(--primary);
-            background: #222433;
+            background: #181926;
         }
 
         .close-modal {
-            background: var(--danger);
-            color: white;
-            border: none;
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
             padding: 10px 16px;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
             width: 100%;
             font-weight: bold;
             font-size: 15px;
+            transition: all 0.2s;
         }
 
-        /* Modern Professional Footer */
+        .close-modal:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* --- Footer Design --- */
         .site-footer {
-            background: #0b0c10;
-            border-top: 1px solid rgba(255,255,255,0.08);
+            background: #050608;
+            border-top: 1px solid rgba(255,255,255,0.06);
             padding: 50px 5% 20px;
             margin-top: auto;
         }
@@ -518,84 +771,108 @@
 
         .footer-col h4 {
             color: #c084fc;
-            font-size: 18px;
-            margin-bottom: 15px;
+            font-size: 16px;
+            margin-bottom: 18px;
             position: relative;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
         }
 
         .footer-col h4::after {
             content: '';
             position: absolute;
             left: 0;
-            bottom: -5px;
-            width: 30px;
+            bottom: -6px;
+            width: 35px;
             height: 2px;
-            background: #db2777;
+            background: #ec4899;
         }
 
         .footer-col p {
             color: var(--text-muted);
             font-size: 13px;
-            line-height: 1.6;
-        }
-
-        .footer-col ul {
-            list-style: none;
-        }
-
-        .footer-col ul li {
+            line-height: 1.7;
             margin-bottom: 10px;
         }
 
-        .footer-col ul li a {
+        .footer-links, .trust-list {
+            list-style: none;
+        }
+
+        .footer-links li, .trust-list li {
+            margin-bottom: 8px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+
+        .footer-links a {
             color: var(--text-muted);
             text-decoration: none;
-            font-size: 14px;
+            font-size: 13px;
             transition: 0.2s;
             cursor: pointer;
         }
 
-        .footer-col ul li a:hover {
+        .footer-links a:hover {
             color: #c084fc;
             padding-left: 5px;
         }
 
-        .footer-qr-box {
-            background: #181924;
-            border: 1px solid var(--card-border);
-            padding: 15px;
-            border-radius: 12px;
-            text-align: center;
+        .review-section {
             margin-top: 15px;
         }
 
-        .footer-qr-box img {
-            width: 100px;
-            height: 100px;
-            border-radius: 6px;
-            background: white;
-            padding: 5px;
-            margin-bottom: 8px;
+        .google-review-btn {
+            display: inline-block;
+            background-color: #4285F4;
+            color: white !important;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+            margin-bottom: 10px;
+            text-decoration: none;
+            transition: 0.3s;
         }
 
-        .footer-qr-box a {
-            display: inline-block;
-            background: var(--accent-gradient);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 6px;
+        .google-review-btn:hover {
+            background-color: #3367d6;
+        }
+
+        .badge {
+            background: rgba(0, 0, 0, 0.25);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            margin-left: 4px;
+        }
+
+        .website-reviews {
             font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .review-link {
+            color: #c084fc !important;
             text-decoration: none;
-            font-weight: bold;
-            margin-top: 5px;
+        }
+
+        .review-link:hover {
+            text-decoration: underline;
         }
 
         .footer-bottom {
             text-align: center;
-            border-top: 1px solid rgba(255,255,255,0.05);
+            border-top: 1px solid rgba(255,255,255,0.04);
             padding-top: 20px;
             font-size: 13px;
             color: var(--text-muted);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
         }
     </style>
 </head>
@@ -603,7 +880,20 @@
 
     <!-- AUTHENTICATION CONTAINER -->
     <div id="auth-view">
-        <!-- Login Form -->
+        <!-- Cinematic Background Glowing Orbs -->
+        <div class="auth-bg-orbs">
+            <div class="orb orb-1"></div>
+            <div class="orb orb-2"></div>
+            <div class="orb orb-3"></div>
+        </div>
+
+        <!-- Ambient Floating Marquee Texts for Video Recording -->
+        <div class="ambient-text-layer">
+            <div class="ambient-row">SOUMIK ONLINE STORE — DIGITAL SERVICES HUB — FAST & SECURE DOCUMENTATION — PAN CARD — VOTER ID — PASSPORT — </div>
+            <div class="ambient-row">GOVERNMENT APPLICATIONS — BILL PAYMENTS — MONEY TRANSFER — 100% SECURE PROCESSING — TRUSTED DIGITAL PARTNER — </div>
+            <div class="ambient-row">QUICK ASSISTANCE — GST REGISTRATION — RATION CARD — FLIGHT & HOTEL BOOKING — </div>
+        </div>
+
         <div id="login-card" class="auth-container">
             <div class="auth-header">
                 <h2>Soumik Online Store</h2>
@@ -627,34 +917,6 @@
             </div>
         </div>
 
-        <!-- Forgot Password Form -->
-        <div id="forgot-card" class="auth-container" style="display: none;">
-            <div class="auth-header">
-                <h2>Reset Password</h2>
-                <p style="color: var(--text-muted); font-size: 14px;">Verify details to reset your password</p>
-            </div>
-            <form id="forgot-form">
-                <div class="form-group">
-                    <label>Registered Email Address</label>
-                    <input type="email" id="reset-email" required placeholder="Enter Email Address">
-                </div>
-                <div class="form-group">
-                    <label>Registered Mobile Number</label>
-                    <input type="tel" id="reset-phone" required placeholder="Enter Mobile Number">
-                </div>
-                <div class="form-group">
-                    <label>New Password</label>
-                    <input type="password" id="reset-new-password" required placeholder="Enter Password">
-                    <span class="toggle-password" onclick="togglePass('reset-new-password')">👁️</span>
-                </div>
-                <button type="submit" class="btn">Update Password</button>
-            </form>
-            <div class="auth-toggle-text">
-                Remember your password? <a onclick="showLogin()">Login Here</a>
-            </div>
-        </div>
-
-        <!-- Registration Form -->
         <div id="register-card" class="auth-container" style="display: none;">
             <div class="auth-header">
                 <h2>Register Account</h2>
@@ -693,41 +955,83 @@
                 <span>🛒</span> Soumik Online Store
             </div>
             <div class="profile-menu-container">
-                <div class="profile-icon" onclick="toggleProfileMenu()">
-                    👤
-                </div>
+                <div class="profile-icon" onclick="toggleProfileMenu()">👤</div>
                 <div class="profile-dropdown" id="profile-dropdown">
                     <div class="profile-info">
                         <p>Name: <strong id="user-display-name">---</strong></p>
                         <p>Email: <strong id="user-display-email">---</strong></p>
                         <p>Mobile: <strong id="user-display-phone">---</strong></p>
                     </div>
-                    <button class="dropdown-btn btn-change-pass" onclick="changePassword()">Change Password</button>
-                    <button class="dropdown-btn btn-logout" onclick="logout()">Logout</button>
+                    <button class="dropdown-btn btn-password-change" onclick="openChangePasswordModal()">🔑 Change Password</button>
+                    <button class="dropdown-btn btn-logout" onclick="logout()">🚪 Logout</button>
                 </div>
             </div>
         </header>
 
-        <!-- Hero Section with Auto Image Slider -->
         <section class="hero">
             <div class="hero-content">
                 <div class="logo-3d">Soumik Online Store</div>
                 <h1>Welcome to Digital Service Center</h1>
-                <p>Your one-stop destination for 30+ Online Applications, Government Certificates, Utility Recharges & Fast Digital Document Processing across India.</p>
-                <div class="quick-actions">
-                    <a href="https://wa.me/919593106177" target="_blank" class="action-btn bg-whatsapp">💬 WhatsApp</a>
-                    <a href="tel:9242088742" class="action-btn bg-call">📞 Call Us</a>
-                    <a href="mailto:tutotisonlines@gmail.com" class="action-btn bg-email">📧 Email Support</a>
+                <p>Your trusted destination for fast online documentation, government applications, bill payments, money transfer, financial services, and travel bookings across India.</p>
+                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+                    <div style="background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.4); padding: 10px 15px; border-radius: 10px;">
+                        <strong style="color: #c084fc; display: block; font-size: 16px;">100% Secure</strong>
+                        <span style="font-size: 12px; color: var(--text-muted);">Trusted Processing</span>
+                    </div>
+                    <div style="background: rgba(236, 72, 153, 0.15); border: 1px solid rgba(236, 72, 153, 0.4); padding: 10px 15px; border-radius: 10px;">
+                        <strong style="color: #f472b6; display: block; font-size: 16px;">Fast Support</strong>
+                        <span style="font-size: 12px; color: var(--text-muted);">Quick Assistance</span>
+                    </div>
                 </div>
             </div>
-            
-            <div class="hero-slider-box">
-                <img src="https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&w=600&q=80" class="slider-img active" alt="Digital Services India">
-                <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80" class="slider-img" alt="Online Applications Portal">
-                <img src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=600&q=80" class="slider-img" alt="E-Governance & Certificates">
-                <img src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=600&q=80" class="slider-img" alt="Professional Digital Support">
+
+            <div class="hero-showcase-box">
+                <div class="slider-container">
+                    <span class="slider-badge">⚡ Active & Upcoming Services</span>
+                    <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=600&q=80" class="slider-img active" alt="Documentation">
+                    <img src="https://images.unsplash.com/photo-1559526324-4b87b5e36e44?auto=format&fit=crop&w=600&q=80" class="slider-img" alt="Banking Services">
+                    <img src="https://images.unsplash.com/photo-1580910051074-3eb694886505?auto=format&fit=crop&w=600&q=80" class="slider-img" alt="Money Transfer">
+                    <img src="https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600&q=80" class="slider-img" alt="Flight Booking">
+                </div>
             </div>
         </section>
+
+        <!-- Quick Contact Strip -->
+        <div class="quick-contact-strip">
+            <div class="quick-contact-container">
+                <div class="quick-contact-title">
+                    <span>⚡ Instant Support Hub — Connect With Us</span>
+                </div>
+                <div class="quick-contact-icons">
+                    <!-- WhatsApp Chat Button -->
+                    <a href="https://wa.me/919593106177?text=Hi,%20Soumik%20Online%20Store.%20I%20want%20to%20know%20more%20about%20your%20services" target="_blank" class="icon-action-btn whatsapp" title="WhatsApp Support">
+                        <svg viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.371l-.361-.214-3.732.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.84 9.84 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.49 0 .16 5.33 0 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.305-1.654a11.882 11.882 0 005.745 1.467h.005c6.559 0 11.89-5.33 11.893-11.893a11.821 11.821 0 00-3.48-8.353z"/></svg>
+                        <div class="label-box">
+                            <span class="title">WhatsApp Chat</span>
+                            <span class="label">Click to Chat</span>
+                        </div>
+                    </a>
+
+                    <!-- Direct Call Button -->
+                    <a href="tel:9593106177" class="icon-action-btn call" title="Call Support">
+                        <svg viewBox="0 0 24 24" fill="#0284c7"><path d="M6.62 10.79c1.44 2.83 3.76 5.15 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+                        <div class="label-box">
+                            <span class="title">Direct Call</span>
+                            <span class="label">Click to Call</span>
+                        </div>
+                    </a>
+
+                    <!-- Email Support Button -->
+                    <a href="mailto:tutotisonlines@gmail.com?subject=Inquiry%20About%20Services" class="icon-action-btn email" title="Email Support">
+                        <svg viewBox="0 0 24 24" fill="#db2777"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+                        <div class="label-box">
+                            <span class="title">Email Support</span>
+                            <span class="label">tutotisonlines@gmail.com</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
 
         <div class="main-content">
             <h2 class="section-title">Active Services</h2>
@@ -738,212 +1042,539 @@
                 </div>
                 <div class="service-card">
                     <h3>Voter Card Service</h3>
-                    <button onclick="alert('Redirecting to Voter Portal...')">Apply Now</button>
+                    <button onclick="openVoterModal()">Open Applications</button>
                 </div>
                 <div class="service-card">
                     <h3>Ration Card Service</h3>
-                    <button onclick="alert('Redirecting to Ration Portal...')">Apply Now</button>
+                    <button onclick="openRationModal()">Open Applications</button>
                 </div>
                 <div class="service-card">
-                    <h3>Birth Certificate</h3>
-                    <button onclick="alert('Redirecting to Birth Registration...')">Apply Now</button>
+                    <h3>Birth Certificate Service</h3>
+                    <button onclick="openBirthModal()">Open Applications</button>
                 </div>
                 <div class="service-card">
-                    <h3>Death Certificate</h3>
-                    <button onclick="alert('Redirecting to Death Registration...')">Apply Now</button>
+                    <h3>Death Certificate Service</h3>
+                    <button onclick="openDeathModal()">Open Applications</button>
                 </div>
                 <div class="service-card">
-                    <h3>Income Certificate</h3>
-                    <button onclick="alert('Redirecting to e-District...')">Apply Now</button>
+                    <h3>Income Certificate Service</h3>
+                    <button onclick="openIncomeModal()">Open Applications</button>
                 </div>
                 <div class="service-card">
-                    <h3>Ordinary Resident Cert.</h3>
-                    <button onclick="alert('Redirecting to e-District...')">Apply Now</button>
+                    <h3>Ordinary Resident Certificate</h3>
+                    <button onclick="openResidentModal()">Open Applications</button>
                 </div>
                 <div class="service-card">
-                    <h3>Caste Certificate</h3>
-                    <button onclick="alert('Redirecting to Caste Certificate Portal...')">Apply Now</button>
+                    <h3>Caste Certificate Service</h3>
+                    <button onclick="openCasteModal()">Open Applications</button>
+                </div>
+                <div class="service-card">
+                    <h3>Annapurna Bhandar</h3>
+                    <button onclick="openAnnapurnaModal()">Open Portal</button>
+                </div>
+                <div class="service-card">
+                    <h3>Invoice Bill Management</h3>
+                    <button onclick="openInvoiceModal()">Open Dashboard</button>
                 </div>
                 <div class="service-card">
                     <h3>Passport Application</h3>
-                    <button onclick="alert('Redirecting to Passport Seva...')">Apply Now</button>
+                    <button onclick="openPassportModal()">Open Portal</button>
                 </div>
                 <div class="service-card">
-                    <h3>Driving Licence</h3>
-                    <button onclick="alert('Redirecting to Parivahan...')">Apply Now</button>
+                    <h3>Driving Licence Services</h3>
+                    <button onclick="openDlModal()">Open Portal</button>
                 </div>
                 <div class="service-card">
                     <h3>Electricity Bill Payment</h3>
-                    <button onclick="alert('Redirecting to WBSEDCL...')">Pay Now</button>
-                </div>
-                <div class="service-card">
-                    <h3>Mobile Recharge</h3>
-                    <button onclick="alert('Redirecting to Recharge Portal...')">Recharge Now</button>
+                    <button onclick="openElectricityModal()">Open Portal</button>
                 </div>
                 <div class="service-card">
                     <h3>BBPS Bill Payment</h3>
-                    <button onclick="alert('Opening BBPS Portal...')">Pay Bills</button>
+                    <button onclick="openBbpsModal()">Open Portal</button>
                 </div>
                 <div class="service-card">
                     <h3>IRCTC Rail Tickets</h3>
-                    <button onclick="alert('Opening Ticket Booking...')">Book Ticket</button>
+                    <button onclick="openIrctcModal()">Open Portal</button>
                 </div>
                 <div class="service-card">
                     <h3>Flight Booking</h3>
-                    <button onclick="alert('Opening Flight Portal...')">Book Flight</button>
+                    <button onclick="openFlightModal()">Open Portal</button>
                 </div>
                 <div class="service-card">
                     <h3>Bus Ticket Booking</h3>
-                    <button onclick="alert('Opening Bus Booking...')">Book Ticket</button>
+                    <button onclick="openBusModal()">Open Portal</button>
                 </div>
                 <div class="service-card">
                     <h3>Hotel Booking</h3>
-                    <button onclick="alert('Opening Hotel Booking...')">Book Room</button>
+                    <button onclick="openHotelModal()">Open Portal</button>
                 </div>
                 <div class="service-card">
                     <h3>Insurance Services</h3>
-                    <button onclick="alert('Opening Insurance Services...')">Access Services</button>
+                    <button onclick="openInsuranceModal()">Open Portal</button>
+                </div>
+                <div class="service-card">
+                    <h3>GST Center & Reg.</h3>
+                    <button onclick="openGstModal()">Open Portal</button>
                 </div>
             </div>
 
-            <h2 class="section-title">Coming Soon Services</h2>
-            <div class="services-grid">
-                <div class="service-card coming-soon">
-                    <span class="badge-cs">Coming Soon</span>
-                    <h3>Aadhaar Service</h3>
-                    <button disabled style="background:#2a2b3d; cursor:not-allowed;">Unavailable</button>
-                </div>
-                <div class="service-card coming-soon">
-                    <span class="badge-cs">Coming Soon</span>
-                    <h3>GST Center & Reg.</h3>
-                    <button disabled style="background:#2a2b3d; cursor:not-allowed;">Unavailable</button>
-                </div>
-                <div class="service-card coming-soon">
-                    <span class="badge-cs">Coming Soon</span>
-                    <h3>Bank Account Opening</h3>
-                    <button disabled style="background:#2a2b3d; cursor:not-allowed;">Unavailable</button>
-                </div>
-                <div class="service-card coming-soon">
-                    <span class="badge-cs">Coming Soon</span>
-                    <h3>Cash Withdrawal (AEPS)</h3>
-                    <button disabled style="background:#2a2b3d; cursor:not-allowed;">Unavailable</button>
-                </div>
-                <div class="service-card coming-soon">
-                    <span class="badge-cs">Coming Soon</span>
-                    <h3>Mini ATM</h3>
-                    <button disabled style="background:#2a2b3d; cursor:not-allowed;">Unavailable</button>
-                </div>
-                <div class="service-card coming-soon">
-                    <span class="badge-cs">Coming Soon</span>
-                    <h3>Money Transfer</h3>
-                    <button disabled style="background:#2a2b3d; cursor:not-allowed;">Unavailable</button>
-                </div>
-                <div class="service-card coming-soon">
-                    <span class="badge-cs">Coming Soon</span>
-                    <h3>Cash Deposit</h3>
-                    <button disabled style="background:#2a2b3d; cursor:not-allowed;">Unavailable</button>
-                </div>
-                <div class="service-card coming-soon">
-                    <span class="badge-cs">Coming Soon</span>
-                    <h3>e-Shram Registration</h3>
-                    <button disabled style="background:#2a2b3d; cursor:not-allowed;">Unavailable</button>
+            <div class="coming-soon-section">
+                <h2 class="coming-soon-title">🚀 Coming Soon Services</h2>
+                <div class="services-grid" style="margin-bottom: 0;">
+                    <div class="service-card coming-soon">
+                        <span class="badge-cs">SOON</span>
+                        <h3>Mobile Recharge</h3>
+                        <button onclick="openMobileRechargeModal()">Check Status</button>
+                    </div>
+                    <div class="service-card coming-soon">
+                        <span class="badge-cs">SOON</span>
+                        <h3>Aadhaar Centre</h3>
+                        <button onclick="openAadhaarModal()">Check Status</button>
+                    </div>
+                    <div class="service-card coming-soon">
+                        <span class="badge-cs">SOON</span>
+                        <h3>Gas Bill Pay</h3>
+                        <button onclick="openGasModal()">Check Status</button>
+                    </div>
+                    <div class="service-card coming-soon">
+                        <span class="badge-cs">SOON</span>
+                        <h3>Aeps</h3>
+                        <button onclick="openAepsModal()">Check Status</button>
+                    </div>
+                    <div class="service-card coming-soon">
+                        <span class="badge-cs">SOON</span>
+                        <h3>Money Transfer</h3>
+                        <button onclick="openMoneyTransferModal()">Check Status</button>
+                    </div>
+                    <div class="service-card coming-soon">
+                        <span class="badge-cs">SOON</span>
+                        <h3>Mini ATM</h3>
+                        <button onclick="openMiniAtmModal()">Check Status</button>
+                    </div>
+                    <div class="service-card coming-soon">
+                        <span class="badge-cs">SOON</span>
+                        <h3>Cash Deposit</h3>
+                        <button onclick="openCashDepositModal()">Check Status</button>
+                    </div>
+                    <div class="service-card coming-soon">
+                        <span class="badge-cs">SOON</span>
+                        <h3>Loan Repayment</h3>
+                        <button onclick="openLoanRepaymentModal()">Check Status</button>
+                    </div>
+                    <div class="service-card coming-soon">
+                        <span class="badge-cs">SOON</span>
+                        <h3>Account Opening</h3>
+                        <button onclick="openAccountOpeningModal()">Check Status</button>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- Footer -->
         <footer class="site-footer">
             <div class="footer-container">
                 <div class="footer-col">
-                    <h4>About Us</h4>
-                    <p>Soumik Online Store is your trusted digital service partner across India. We specialize in fast online form processing, government certificate applications, bill payments, and ticketing services with maximum efficiency and security.</p>
+                    <h4>About Soumik Store</h4>
+                    <p>Soumik Online Store is your trusted digital service partner across India, providing secure online document processing, ticket bookings, financial solutions, and government application services.</p>
                     
-                    <div class="footer-qr-box">
-                        <p style="font-size: 12px; color: #fff; margin-bottom: 5px; font-weight: bold;">⭐ Google Review & Ratings</p>
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://booster.grexa.ai/google-review-qr/369175" alt="Google Review QR Code">
-                        <br>
-                        <a href="https://booster.grexa.ai/google-review-qr/369175" target="_blank">Check Google Reviews</a>
+                    <div class="review-section">
+                        <!-- Updated Google Review Button -->
+                        <a href="https://booster.grexa.ai/google-review-qr/369175" target="_blank" class="google-review-btn">
+                            ⭐ See Our Google Reviews <span class="badge">4.9★ (250+)</span>
+                        </a>
+                        <div class="website-reviews">
+                            <!-- Updated Website Review Links -->
+                            <a href="https://booster.grexa.ai/google-review-qr/369175" target="_blank" class="review-link">💬 Read Customer Reviews</a> | 
+                            <a href="https://booster.grexa.ai/google-review-qr/369175" target="_blank" class="review-link">Write a Review</a>
+                        </div>
                     </div>
                 </div>
 
                 <div class="footer-col">
-                    <h4>Our Services</h4>
-                    <ul>
-                        <li><a onclick="alert('PAN Services Available')">PAN Card Processing</a></li>
-                        <li><a onclick="alert('Certificate Services Available')">Government Certificates</a></li>
-                        <li><a onclick="alert('Utility Bills Active')">Utility & Bill Payments</a></li>
-                        <li><a onclick="alert('Travel Services Active')">IRCTC & Ticket Bookings</a></li>
+                    <h4>Quick Services</h4>
+                    <ul class="footer-links">
+                        <li><a onclick="openPanModal()">PAN Card Application</a></li>
+                        <li><a onclick="openVoterModal()">Voter Card Services</a></li>
+                        <li><a onclick="openPassportModal()">Passport Applications</a></li>
+                        <li><a onclick="openDlModal()">Driving Licence Services</a></li>
+                        <li><a onclick="openGstModal()">GST Registration Hub</a></li>
                     </ul>
                 </div>
 
                 <div class="footer-col">
-                    <h4>Policies & Links</h4>
-                    <ul>
-                        <li><a onclick="openPolicyModal('privacy')">Privacy Policy</a></li>
-                        <li><a onclick="openPolicyModal('terms')">Terms & Conditions</a></li>
-                        <li><a onclick="openPolicyModal('refund')">Refund Policy</a></li>
-                        <li><a onclick="openPolicyModal('help')">Help & Support</a></li>
-                    </ul>
+                    <h4>Contact & Reviews</h4>
+                    <p><strong>📞 Support:</strong> Click to Call</p>
+                    <p><strong>💬 WhatsApp Support:</strong> Active 24/7</p>
+                    <!-- Updated Footer Review Link -->
+                    <p><strong>⭐ App/Website Review:</strong> <a href="https://booster.grexa.ai/google-review-qr/369175" target="_blank" class="review-link">Give Feedback / Review</a></p>
+                    <p><strong>⏰ Working Hours:</strong> Mon - Sat: 9:00 AM - 8:00 PM</p>
                 </div>
 
                 <div class="footer-col">
-                    <h4>Contact Store</h4>
-                    <p style="margin-bottom: 6px;"><strong>📞 Phone:</strong> 9242088742</p>
-                    <p style="margin-bottom: 6px;"><strong>💬 WhatsApp:</strong> 9593106177</p>
-                    <p style="margin-bottom: 6px;"><strong>📧 Email:</strong> tutotisonlines@gmail.com</p>
-                    <p><strong>📍 Address:</strong> Kapista, Paschim Bardhaman, WB - 713315</p>
+                    <h4>Security & Trust</h4>
+                    <ul class="trust-list">
+                        <li>🔒 SSL Secured Website</li>
+                        <li>🛡️ Secure Data Handling</li>
+                        <li>✔️ Verified Official Portals</li>
+                    </ul>
                 </div>
             </div>
 
             <div class="footer-bottom">
-                <p>© 2026 Soumik Online Store. All Rights Reserved | Authorized Common Digital Service Center.</p>
+                <p>© 2026 Soumik Online Store. All Rights Reserved.</p>
+                <div class="footer-bottom-links">
+                    <a href="#" class="review-link">Privacy Policy</a> | <a href="#" class="review-link">Terms & Conditions</a>
+                </div>
             </div>
         </footer>
     </div>
 
-    <!-- PAN MODAL -->
+    <!-- CHANGE PASSWORD MODAL -->
+    <div class="modal" id="change-password-modal">
+        <div class="modal-body">
+            <h3>Change Password</h3>
+            <p>Update your account password securely:</p>
+            <form id="change-password-form">
+                <div class="form-group">
+                    <label>Current Password</label>
+                    <input type="password" id="current-pass" required placeholder="Enter Current Password">
+                </div>
+                <div class="form-group">
+                    <label>New Password</label>
+                    <input type="password" id="new-pass" required placeholder="Enter New Password">
+                </div>
+                <button type="submit" class="btn" style="margin-bottom: 15px;">Update Password</button>
+            </form>
+            <button class="close-modal" onclick="closeChangePasswordModal()">Close Window</button>
+        </div>
+    </div>
+
+    <!-- MODALS -->
     <div class="modal" id="pan-modal">
         <div class="modal-body">
             <h3>PAN Card Services</h3>
-            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 15px;">Select required service link:</p>
+            <p>Select required service link:</p>
             <div class="link-list">
                 <a href="https://forms.gle/YjxMMFanZXfARpWX9" target="_blank" class="link-item">📝 New PAN Card Apply (Google Form)</a>
                 <a href="https://forms.gle/QGxuicqX6FdaMAjS7" target="_blank" class="link-item">🛠️ PAN Card Correction (Google Form)</a>
-                <a href="https://forms.gle/QGxuicqX6FdaMAjS7" target="_blank" class="link-item">🌐 Official PAN Card Portal Link</a>
+                <a href="https://onlineservices.proteantech.in/paam/endUserRegisterContact.html" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Official PAN Card Portal Link</a>
             </div>
             <button class="close-modal" onclick="closePanModal()">Close Window</button>
         </div>
     </div>
 
-    <!-- POLICY MODAL -->
-    <div class="modal" id="policy-modal">
+    <div class="modal" id="voter-modal">
         <div class="modal-body">
-            <h3 id="policy-title">Policy Title</h3>
-            <div id="policy-content"></div>
-            <button class="close-modal" onclick="closePolicyModal()">Close Details</button>
+            <h3>Voter Card Services</h3>
+            <p>Select required service link:</p>
+            <div class="link-list">
+                <a href="https://forms.gle/HKa8qJiTnWaiavGQ8" target="_blank" class="link-item">📝 New Voter ID Apply (Form 6)</a>
+                <a href="https://forms.gle/PtpD4t7TV8SLi3VAA" target="_blank" class="link-item">🛠️ Voter Card Correction / Details Update</a>
+                <a href="https://voters.eci.gov.in/" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Official National Voters' Service Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeVoterModal()">Close Window</button>
         </div>
     </div>
 
-    <!-- Firebase SDKs & Script Integration -->
+    <div class="modal" id="ration-modal">
+        <div class="modal-body">
+            <h3>Ration Card Services</h3>
+            <p>Select required service link:</p>
+            <div class="link-list">
+                <a class="link-item" style="background:#1a1c29; cursor:not-allowed; color:var(--text-muted);">📝 New Ration Card (Coming Soon)</a>
+                <a class="link-item" style="background:#1a1c29; cursor:not-allowed; color:var(--text-muted);">🛠️ Ration Card Correction (Coming Soon)</a>
+                <a href="https://food.wb.gov.in/" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Official Food & Supplies Department Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeRationModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="birth-modal">
+        <div class="modal-body">
+            <h3>Birth Certificate Services</h3>
+            <p>Select required service link:</p>
+            <div class="link-list">
+                <a href="https://dc.crsorgi.gov.in/crs/" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Official Birth Certificate Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeBirthModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="death-modal">
+        <div class="modal-body">
+            <h3>Death Certificate Services</h3>
+            <p>Select required service link:</p>
+            <div class="link-list">
+                <a href="https://dc.crsorgi.gov.in/crs/" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Official Death Certificate Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeDeathModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="income-modal">
+        <div class="modal-body">
+            <h3>Income Certificate Services</h3>
+            <p>Select required service link:</p>
+            <div class="link-list">
+                <a class="link-item" style="background:#1a1c29; cursor:not-allowed; color:var(--text-muted);">📝 Income Certificate Apply (Coming Soon)</a>
+                <a href="https://edistrict.wb.gov.in/portal/home" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Official Income Certificate Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeIncomeModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="resident-modal">
+        <div class="modal-body">
+            <h3>Ordinary Resident Certificate Services</h3>
+            <p>Select required service link:</p>
+            <div class="link-list">
+                <a class="link-item" style="background:#1a1c29; cursor:not-allowed; color:var(--text-muted);">📝 Ordinary Resident Certificate Apply (Coming Soon)</a>
+                <a href="https://edistrict.wb.gov.in/portal/home" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Official Ordinary Resident Certificate Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeResidentModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="caste-modal">
+        <div class="modal-body">
+            <h3>Caste Certificate Services</h3>
+            <p>Select required service link:</p>
+            <div class="link-list">
+                <a class="link-item" style="background:#1a1c29; cursor:not-allowed; color:var(--text-muted);">📝 Caste Certificate Apply (Coming Soon)</a>
+                <a href="https://castcertificatewb.gov.in/" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Official Caste Certificate Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeCasteModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="annapurna-modal">
+        <div class="modal-body">
+            <h3>Annapurna Bhandar Services</h3>
+            <p>Access the official social security and family registry portal:</p>
+            <div class="link-list">
+                <a href="https://socialregistry.wb.gov.in/citizen/#/" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Open Social Registry & Annapurna Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeAnnapurnaModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="invoice-modal">
+        <div class="modal-body">
+            <h3>Invoice & Billing Management</h3>
+            <p>Access your billing system:</p>
+            <div class="link-list">
+                <a href="https://invoice.zoho.in/app/60079234338#/home/dashboard" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Open Zoho Invoice Dashboard</a>
+            </div>
+            <button class="close-modal" onclick="closeInvoiceModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="passport-modal">
+        <div class="modal-body">
+            <h3>Passport Application Services</h3>
+            <p>Access the official passport service portal:</p>
+            <div class="link-list">
+                <a href="https://www.passportindia.gov.in/psp" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Open Passport Seva Portal</a>
+            </div>
+            <button class="close-modal" onclick="closePassportModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="dl-modal">
+        <div class="modal-body">
+            <h3>Driving Licence Services</h3>
+            <p>Access the official transport and driving licence portal:</p>
+            <div class="link-list">
+                <a href="https://parivahan.gov.in/" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Open Parivahan Sewa Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeDlModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="electricity-modal">
+        <div class="modal-body">
+            <h3>Electricity Bill Payment Services</h3>
+            <p>Access the official electricity distribution portal:</p>
+            <div class="link-list">
+                <a href="https://www.wbsedcl.in/irj/go/km/docs/internet/new_website/Home.html" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Open WBSEDCL Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeElectricityModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="bbps-modal">
+        <div class="modal-body">
+            <h3>BBPS Bill Payment Services</h3>
+            <p>Access the official Bharat Connect portal:</p>
+            <div class="link-list">
+                <a href="https://www.bharat-connect.com/" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Open Bharat Connect Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeBbpsModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="irctc-modal">
+        <div class="modal-body">
+            <h3>IRCTC Rail Tickets Services</h3>
+            <p>Access train booking and checking services:</p>
+            <div class="link-list">
+                <a href="https://www.ixigo.com/trains" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Open Ixigo Trains Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeIrctcModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="flight-modal">
+        <div class="modal-body">
+            <h3>Flight Booking Services</h3>
+            <p>Access flight search and booking services:</p>
+            <div class="link-list">
+                <a href="https://www.skyscanner.co.in/flights" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Open Skyscanner Flight Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeFlightModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="bus-modal">
+        <div class="modal-body">
+            <h3>Bus Ticket Booking Services</h3>
+            <p>Access bus ticket booking and reservation services:</p>
+            <div class="link-list">
+                <a href="https://www.redbus.in/" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Open RedBus Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeBusModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="hotel-modal">
+        <div class="modal-body">
+            <h3>Hotel Booking Services</h3>
+            <p>Access hotel search and reservation services:</p>
+            <div class="link-list">
+                <a href="https://www.booking.com/index.html" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Open Booking.com Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeHotelModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="insurance-modal">
+        <div class="modal-body">
+            <h3>Insurance Services</h3>
+            <p>Access motor, vehicle, and health insurance quoting portals:</p>
+            <div class="link-list">
+                <a href="https://www.tataaig.com/buy-online/motor-insurance/car-insurance" target="_blank" class="link-item">🌐 Open Tata AIG Car Insurance Portal</a>
+                <a href="https://health.policybazaar.com/" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Open Policybazaar Health Insurance Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeInsuranceModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="gst-modal">
+        <div class="modal-body">
+            <h3>GST Center & Registration</h3>
+            <p>Access official Goods and Services Tax portal services:</p>
+            <div class="link-list">
+                <a href="https://reg.gst.gov.in/registration/" target="_blank" class="link-item" style="background:var(--accent-gradient);">🌐 Official GST Registration Portal</a>
+            </div>
+            <button class="close-modal" onclick="closeGstModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="mobile-recharge-modal">
+        <div class="modal-body">
+            <h3>Mobile Recharge Services</h3>
+            <p>Prepaid and Postpaid Mobile Recharge integration is currently under development and will be available soon.</p>
+            <button class="close-modal" onclick="closeMobileRechargeModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="aadhaar-modal">
+        <div class="modal-body">
+            <h3>Aadhaar Centre</h3>
+            <p>Aadhaar Centre services are currently under development and will be available soon.</p>
+            <button class="close-modal" onclick="closeAadhaarModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="gas-modal">
+        <div class="modal-body">
+            <h3>Gas Bill Pay</h3>
+            <p>Gas Bill Payment service is currently under development and will be available soon.</p>
+            <button class="close-modal" onclick="closeGasModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="aeps-modal">
+        <div class="modal-body">
+            <h3>Aeps</h3>
+            <p>AePS (Aadhaar Enabled Payment System) service is currently under development and will be available soon.</p>
+            <button class="close-modal" onclick="closeAepsModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="money-transfer-modal">
+        <div class="modal-body">
+            <h3>Money Transfer</h3>
+            <p>Money Transfer service is currently under development and will be available soon.</p>
+            <button class="close-modal" onclick="closeMoneyTransferModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="mini-atm-modal">
+        <div class="modal-body">
+            <h3>Mini ATM</h3>
+            <p>Mini ATM service is currently under development and will be available soon.</p>
+            <button class="close-modal" onclick="closeMiniAtmModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="cash-deposit-modal">
+        <div class="modal-body">
+            <h3>Cash Deposit</h3>
+            <p>Cash Deposit service is currently under development and will be available soon.</p>
+            <button class="close-modal" onclick="closeCashDepositModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="loan-repayment-modal">
+        <div class="modal-body">
+            <h3>Loan Repayment</h3>
+            <p>Loan Repayment service is currently under development and will be available soon.</p>
+            <button class="close-modal" onclick="closeLoanRepaymentModal()">Close Window</button>
+        </div>
+    </div>
+
+    <div class="modal" id="account-opening-modal">
+        <div class="modal-body">
+            <h3>Account Opening</h3>
+            <p>Account Opening service is currently under development and will be available soon.</p>
+            <button class="close-modal" onclick="closeAccountOpeningModal()">Close Window</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK Integration -->
     <script type="module">
+        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 
+        // Your web app's Firebase configuration
         const firebaseConfig = {
-          apiKey: "AIzaSyDH4_F4NFxKeI3TMAFjkIzLcTPanXUuwzQ",
-          authDomain: "soumik-e4739.firebaseapp.com",
-          projectId: "soumik-e4739",
-          storageBucket: "soumik-e4739.firebasestorage.app",
-          messagingSenderId: "855154870446",
-          appId: "1:855154870446:web:2b4bdb7591da5c2d8b053f",
-          measurementId: "G-EH2RWCXZJ2"
+            apiKey: "AIzaSyAH86oVcKcBvKijEp6e0wQYfk1NOV0_Li0",
+            authDomain: "soumik-online-store-b375e.firebaseapp.com",
+            projectId: "soumik-online-store-b375e",
+            storageBucket: "soumik-online-store-b375e.firebasestorage.app",
+            messagingSenderId: "553618037876",
+            appId: "1:553618037876:web:1e49af3f28b4a89eb64521",
+            measurementId: "G-NHW6286XD9"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
     </script>
 
     <script>
-        // Auto Image Slider Script
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slider-img');
         function nextSlide() {
@@ -954,25 +1585,16 @@
         }
         setInterval(nextSlide, 3500);
 
-        // Account management via LocalStorage / Cloud sync ready
         let registeredUser = JSON.parse(localStorage.getItem('soumik_store_user')) || null;
 
         function showRegister() {
             document.getElementById('login-card').style.display = 'none';
-            document.getElementById('forgot-card').style.display = 'none';
             document.getElementById('register-card').style.display = 'block';
         }
 
         function showLogin() {
             document.getElementById('register-card').style.display = 'none';
-            document.getElementById('forgot-card').style.display = 'none';
             document.getElementById('login-card').style.display = 'block';
-        }
-
-        function showForgotPass() {
-            document.getElementById('login-card').style.display = 'none';
-            document.getElementById('register-card').style.display = 'none';
-            document.getElementById('forgot-card').style.display = 'block';
         }
 
         function togglePass(fieldId) {
@@ -989,7 +1611,6 @@
 
             registeredUser = { name, phone, email, password };
             localStorage.setItem('soumik_store_user', JSON.stringify(registeredUser));
-            
             alert('Registration Successful! Please log in now.');
             showLogin();
         });
@@ -1006,7 +1627,6 @@
             }
 
             const isMatch = (registeredUser.email === identifier || registeredUser.phone === identifier);
-
             if (isMatch && registeredUser.password === password) {
                 alert('Login Successful!');
                 loadDashboard();
@@ -1015,31 +1635,25 @@
             }
         });
 
-        document.getElementById('forgot-form').addEventListener('submit', function(e) {
+        document.getElementById('change-password-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            const email = document.getElementById('reset-email').value;
-            const phone = document.getElementById('reset-phone').value;
-            const newPassword = document.getElementById('reset-new-password').value;
+            const currentPass = document.getElementById('current-pass').value;
+            const newPass = document.getElementById('new-pass').value;
 
-            if (!registeredUser) {
-                alert('No registered user found on this device.');
-                return;
-            }
-
-            if (registeredUser.email === email && registeredUser.phone === phone) {
-                registeredUser.password = newPassword;
+            if (registeredUser && registeredUser.password === currentPass) {
+                registeredUser.password = newPass;
                 localStorage.setItem('soumik_store_user', JSON.stringify(registeredUser));
-                alert('Password reset successfully! You can now log in.');
-                showLogin();
+                alert('Password changed successfully!');
+                closeChangePasswordModal();
+                document.getElementById('change-password-form').reset();
             } else {
-                alert('Verification failed. Email and Mobile do not match!');
+                alert('Current password is incorrect!');
             }
         });
 
         function loadDashboard() {
             document.getElementById('auth-view').style.display = 'none';
             document.getElementById('dashboard-view').style.display = 'flex';
-
             document.getElementById('user-display-name').textContent = registeredUser.name;
             document.getElementById('user-display-email').textContent = registeredUser.email;
             document.getElementById('user-display-phone').textContent = registeredUser.phone;
@@ -1049,13 +1663,13 @@
             document.getElementById('profile-dropdown').classList.toggle('active');
         }
 
-        function changePassword() {
-            const newPass = prompt("Enter your new password:");
-            if (newPass && newPass.trim() !== "") {
-                registeredUser.password = newPass.trim();
-                localStorage.setItem('soumik_store_user', JSON.stringify(registeredUser));
-                alert("Password changed successfully!");
-            }
+        function openChangePasswordModal() {
+            document.getElementById('profile-dropdown').classList.remove('active');
+            document.getElementById('change-password-modal').classList.add('active');
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('change-password-modal').classList.remove('active');
         }
 
         function logout() {
@@ -1065,63 +1679,65 @@
             showLogin();
         }
 
-        function openPanModal() {
-            document.getElementById('pan-modal').classList.add('active');
-        }
+        function openPanModal() { document.getElementById('pan-modal').classList.add('active'); }
+        function closePanModal() { document.getElementById('pan-modal').classList.remove('active'); }
+        function openVoterModal() { document.getElementById('voter-modal').classList.add('active'); }
+        function closeVoterModal() { document.getElementById('voter-modal').classList.remove('active'); }
+        function openRationModal() { document.getElementById('ration-modal').classList.add('active'); }
+        function closeRationModal() { document.getElementById('ration-modal').classList.remove('active'); }
+        function openBirthModal() { document.getElementById('birth-modal').classList.add('active'); }
+        function closeBirthModal() { document.getElementById('birth-modal').classList.remove('active'); }
+        function openDeathModal() { document.getElementById('death-modal').classList.add('active'); }
+        function closeDeathModal() { document.getElementById('death-modal').classList.remove('active'); }
+        function openIncomeModal() { document.getElementById('income-modal').classList.add('active'); }
+        function closeIncomeModal() { document.getElementById('income-modal').classList.remove('active'); }
+        function openResidentModal() { document.getElementById('resident-modal').classList.add('active'); }
+        function closeResidentModal() { document.getElementById('resident-modal').classList.remove('active'); }
+        function openCasteModal() { document.getElementById('caste-modal').classList.add('active'); }
+        function closeCasteModal() { document.getElementById('caste-modal').classList.remove('active'); }
+        function openAnnapurnaModal() { document.getElementById('annapurna-modal').classList.add('active'); }
+        function closeAnnapurnaModal() { document.getElementById('annapurna-modal').classList.remove('active'); }
+        function openInvoiceModal() { document.getElementById('invoice-modal').classList.add('active'); }
+        function closeInvoiceModal() { document.getElementById('invoice-modal').classList.remove('active'); }
+        function openPassportModal() { document.getElementById('passport-modal').classList.add('active'); }
+        function closePassportModal() { document.getElementById('passport-modal').classList.remove('active'); }
+        function openDlModal() { document.getElementById('dl-modal').classList.add('active'); }
+        function closeDlModal() { document.getElementById('dl-modal').classList.remove('active'); }
+        function openElectricityModal() { document.getElementById('electricity-modal').classList.add('active'); }
+        function closeElectricityModal() { document.getElementById('electricity-modal').classList.remove('active'); }
+        function openBbpsModal() { document.getElementById('bbps-modal').classList.add('active'); }
+        function closeBbpsModal() { document.getElementById('bbps-modal').classList.remove('active'); }
+        function openIrctcModal() { document.getElementById('irctc-modal').classList.add('active'); }
+        function closeIrctcModal() { document.getElementById('irctc-modal').classList.remove('active'); }
+        function openFlightModal() { document.getElementById('flight-modal').classList.add('active'); }
+        function closeFlightModal() { document.getElementById('flight-modal').classList.remove('active'); }
+        function openBusModal() { document.getElementById('bus-modal').classList.add('active'); }
+        function closeBusModal() { document.getElementById('bus-modal').classList.remove('active'); }
+        function openHotelModal() { document.getElementById('hotel-modal').classList.add('active'); }
+        function closeHotelModal() { document.getElementById('hotel-modal').classList.remove('active'); }
+        function openInsuranceModal() { document.getElementById('insurance-modal').classList.add('active'); }
+        function closeInsuranceModal() { document.getElementById('insurance-modal').classList.remove('active'); }
+        function openGstModal() { document.getElementById('gst-modal').classList.add('active'); }
+        function closeGstModal() { document.getElementById('gst-modal').classList.remove('active'); }
+        function openMobileRechargeModal() { document.getElementById('mobile-recharge-modal').classList.add('active'); }
+        function closeMobileRechargeModal() { document.getElementById('mobile-recharge-modal').classList.remove('active'); }
 
-        function closePanModal() {
-            document.getElementById('pan-modal').classList.remove('active');
-        }
-
-        function openPolicyModal(type) {
-            const modal = document.getElementById('policy-modal');
-            const title = document.getElementById('policy-title');
-            const content = document.getElementById('policy-content');
-
-            if (type === 'privacy') {
-                title.textContent = 'Privacy Policy & Data Security';
-                content.innerHTML = `
-                    <p>At <strong>Soumik Online Store</strong>, we take your personal data privacy very seriously. This Privacy Policy outlines how your information is handled safely:</p>
-                    <ul>
-                        <li><strong>Information Collection:</strong> We collect only necessary details such as your Name, Mobile Number, and Email Address strictly for user authentication, digital form processing, and customer support.</li>
-                        <li><strong>Secure Storage:</strong> All user credentials and personal records are encrypted and protected securely. We never sell, rent, or trade your personal details with third-party advertising companies.</li>
-                        <li><strong>Document Safety:</strong> Documents uploaded for PAN, Voter, or Certificate applications are used exclusively for official government form submission and deleted securely post-processing.</li>
-                    </ul>`;
-            } else if (type === 'terms') {
-                title.textContent = 'Terms & Conditions of Service';
-                content.innerHTML = `
-                    <p>Welcome to Soumik Online Store digital portal. By accessing our website and utilizing our online application services, you agree to abide by the following terms:</p>
-                    <ul>
-                        <li><strong>Accuracy of User Data:</strong> Clients must provide accurate spelling, documents, and credentials for PAN Card, Voter Card, Ration Card, and other government certificate applications.</li>
-                        <li><strong>Government Processing Timelines:</strong> Application approvals, verification statuses, and certificate generation depend entirely on official government server processing timelines.</li>
-                        <li><strong>Authorized Usage:</strong> This portal is intended for legitimate citizens seeking assistance with digital form filling, utility bill payments, and authorized ticketing services across India.</li>
-                    </ul>`;
-            } else if (type === 'refund') {
-                title.textContent = 'Refund & Cancellation Policy';
-                content.innerHTML = `
-                    <p>Soumik Online Store maintains a transparent, fair, and customer-friendly refund and cancellation policy for all digital services:</p>
-                    <ul>
-                        <li><strong>Service Failure Refunds:</strong> If an online form submission or digital service fails due to verified technical errors from our end, full service fees will be refunded promptly.</li>
-                        <li><strong>Government Fees Non-Refundable:</strong> Official portal processing fees or government stamp duties once paid are strictly non-refundable as per respective regulations.</li>
-                        <li><strong>Refund Processing Time:</strong> Approved refunds are processed and credited back to the customer's original payment method within 3 to 5 business days.</li>
-                    </ul>`;
-            } else if (type === 'help') {
-                title.textContent = 'Help & Customer Support Center';
-                content.innerHTML = `
-                    <p>We are always here to assist you with your applications, form submissions, and technical queries. Get in touch with our support team instantly:</p>
-                    <ul>
-                        <li><strong>Customer Care Helpline:</strong> 📞 9242088742</li>
-                        <li><strong>WhatsApp Instant Support:</strong> 💬 9593106177</li>
-                        <li><strong>Email Assistance:</strong> 📧 tutotisonlines@gmail.com</li>
-                        <li><strong>Store Location & Address:</strong> 📍 Kapista, Paschim Bardhaman, West Bengal - 713315</li>
-                    </ul>`;
-            }
-            modal.classList.add('active');
-        }
-
-        function closePolicyModal() {
-            document.getElementById('policy-modal').classList.remove('active');
-        }
+        function openAadhaarModal() { document.getElementById('aadhaar-modal').classList.add('active'); }
+        function closeAadhaarModal() { document.getElementById('aadhaar-modal').classList.remove('active'); }
+        function openGasModal() { document.getElementById('gas-modal').classList.add('active'); }
+        function closeGasModal() { document.getElementById('gas-modal').classList.remove('active'); }
+        function openAepsModal() { document.getElementById('aeps-modal').classList.add('active'); }
+        function closeAepsModal() { document.getElementById('aeps-modal').classList.remove('active'); }
+        function openMoneyTransferModal() { document.getElementById('money-transfer-modal').classList.add('active'); }
+        function closeMoneyTransferModal() { document.getElementById('money-transfer-modal').classList.remove('active'); }
+        function openMiniAtmModal() { document.getElementById('mini-atm-modal').classList.add('active'); }
+        function closeMiniAtmModal() { document.getElementById('mini-atm-modal').classList.remove('active'); }
+        function openCashDepositModal() { document.getElementById('cash-deposit-modal').classList.add('active'); }
+        function closeCashDepositModal() { document.getElementById('cash-deposit-modal').classList.remove('active'); }
+        function openLoanRepaymentModal() { document.getElementById('loan-repayment-modal').classList.add('active'); }
+        function closeLoanRepaymentModal() { document.getElementById('loan-repayment-modal').classList.remove('active'); }
+        function openAccountOpeningModal() { document.getElementById('account-opening-modal').classList.add('active'); }
+        function closeAccountOpeningModal() { document.getElementById('account-opening-modal').classList.remove('active'); }
     </script>
 </body>
 </html>
