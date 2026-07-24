@@ -322,54 +322,6 @@
             letter-spacing: 1px;
         }
 
-        /* Custom Search Bar Section */
-        .search-container-section {
-            background: rgba(20, 21, 33, 0.95);
-            border-bottom: 1px solid var(--card-border);
-            padding: 15px 5%;
-            display: flex;
-            justify-content: center;
-        }
-
-        .search-box-wrapper {
-            width: 100%;
-            max-width: 700px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 12px 20px;
-            background: rgba(8, 9, 14, 0.85);
-            border: 1px solid rgba(139, 92, 246, 0.4);
-            border-radius: 12px;
-            color: white;
-            font-size: 15px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            border-color: #ec4899;
-            box-shadow: 0 0 15px rgba(236, 72, 153, 0.4);
-        }
-
-        .search-btn {
-            padding: 12px 20px;
-            background: var(--accent-gradient);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .search-btn:hover {
-            opacity: 0.9;
-        }
-
         /* Profile Dropdown */
         .profile-menu-container {
             position: relative;
@@ -1043,14 +995,6 @@
             </div>
         </header>
 
-        <!-- New Global Search Bar inside Website -->
-        <div class="search-container-section">
-            <div class="search-box-wrapper">
-                <input type="text" id="site-search-input" class="search-input" placeholder="Search services on store or Web (Google)..." onkeyup="filterServices()">
-                <button class="search-btn" onclick="executeWebSearch()">Search on Web (Google)</button>
-            </div>
-        </div>
-
         <section class="hero">
             <div class="hero-content">
                 <div class="logo-3d">Soumik Online Store</div>
@@ -1635,12 +1579,10 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Integration (Universal Multi-Device Sync Enabled) -->
+    <!-- Firebase SDK Integration (Updated v12.16.0) -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyARi2CVZbKd_UYFLUSuFMlw9ToLQNz1x-0",
@@ -1652,86 +1594,9 @@
             measurementId: "G-7166H94EBP"
         };
 
-        // Initialize Firebase & Auth
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let currentUserData = null;
-
-        // Register User Function (Multi-Device Supported)
-        document.getElementById('register-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value.trim();
-            const phone = document.getElementById('reg-phone').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const password = document.getElementById('reg-password').value;
-
-            try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-
-                // Cloud Database-এ ইউজারের তথ্য সংরক্ষণ
-                await setDoc(doc(db, "users", user.uid), {
-                    name: name,
-                    phone: phone,
-                    email: email
-                });
-
-                // মোবাইল নম্বরের মাধ্যমে লগইনের জন্য আলাদা ইনডেক্সিং
-                await setDoc(doc(db, "phones", phone), {
-                    email: email
-                });
-
-                alert('Registration Successful! You can now login from any device.');
-                window.showLogin();
-            } catch (error) {
-                alert('Registration Failed: ' + error.message);
-            }
-        });
-
-        // Login User Function (Cross-Device Compatible)
-        document.getElementById('login-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            let identifier = document.getElementById('login-identifier').value.trim();
-            const password = document.getElementById('login-password').value;
-
-            try {
-                // যদি মোবাইল নাম্বার দেওয়া হয় তবে তার সাথে যুক্ত ইমেইল খুঁজে বের করা
-                if (!identifier.includes('@')) {
-                    const phoneDoc = await getDoc(doc(db, "phones", identifier));
-                    if (phoneDoc.exists()) {
-                        identifier = phoneDoc.data().email;
-                    } else {
-                        alert('No account associated with this mobile number.');
-                        return;
-                    }
-                }
-
-                const userCredential = await signInWithEmailAndPassword(auth, identifier, password);
-                const user = userCredential.user;
-
-                const userDoc = await getDoc(doc(db, "users", user.uid));
-                if (userDoc.exists()) {
-                    currentUserData = userDoc.data();
-                    window.showLoginToast();
-                    window.loadDashboard(currentUserData);
-                }
-            } catch (error) {
-                alert('Login Failed: Invalid details or credentials.');
-            }
-        });
-
-        // Logout User
-        window.logout = function() {
-            signOut(auth).then(() => {
-                document.getElementById('dashboard-view').style.display = 'none';
-                document.getElementById('auth-view').style.display = 'flex';
-                document.getElementById('profile-dropdown').classList.remove('active');
-                window.showLogin();
-            });
-        };
     </script>
 
     <script>
@@ -1744,6 +1609,9 @@
             slides[currentSlide].classList.add('active');
         }
         setInterval(nextSlide, 3500);
+
+        // LocalStorage থেকে ইউজারের তথ্য ফেচ করা
+        let registeredUser = JSON.parse(localStorage.getItem('soumik_store_user')) || null;
 
         function showRegister() {
             document.getElementById('login-card').style.display = 'none';
@@ -1760,6 +1628,7 @@
             input.type = input.type === "password" ? "text" : "password";
         }
 
+        // Custom Toast Notification Function
         function showLoginToast() {
             const toast = document.getElementById('custom-toast');
             toast.classList.add('show');
@@ -1768,36 +1637,64 @@
             }, 2500);
         }
 
-        function loadDashboard(data) {
+        // Register Form Handler
+        document.getElementById('register-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('reg-name').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+
+            registeredUser = { name, phone, email, password };
+            localStorage.setItem('soumik_store_user', JSON.stringify(registeredUser));
+            alert('Registration Successful! Please log in now.');
+            showLogin();
+        });
+
+        // Login Form Handler
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const identifier = document.getElementById('login-identifier').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            if (!registeredUser) {
+                alert('No account found! Please register first.');
+                showRegister();
+                return;
+            }
+
+            const isMatch = (registeredUser.email === identifier || registeredUser.phone === identifier);
+            if (isMatch && registeredUser.password === password) {
+                showLoginToast();
+                loadDashboard();
+            } else {
+                alert('Invalid Email/Mobile or Password. Please try again.');
+            }
+        });
+
+        // Change Password Form Handler
+        document.getElementById('change-password-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const currentPass = document.getElementById('current-pass').value;
+            const newPass = document.getElementById('new-pass').value;
+
+            if (registeredUser && registeredUser.password === currentPass) {
+                registeredUser.password = newPass;
+                localStorage.setItem('soumik_store_user', JSON.stringify(registeredUser));
+                alert('Password changed successfully!');
+                closeChangePasswordModal();
+                document.getElementById('change-password-form').reset();
+            } else {
+                alert('Current password is incorrect!');
+            }
+        });
+
+        function loadDashboard() {
             document.getElementById('auth-view').style.display = 'none';
             document.getElementById('dashboard-view').style.display = 'flex';
-            document.getElementById('user-display-name').textContent = data.name;
-            document.getElementById('user-display-email').textContent = data.email;
-            document.getElementById('user-display-phone').textContent = data.phone;
-        }
-
-        /* --- In-Website & Google Search System --- */
-        function filterServices() {
-            const query = document.getElementById('site-search-input').value.toLowerCase();
-            const cards = document.querySelectorAll('.service-card');
-
-            cards.forEach(card => {
-                const title = card.querySelector('h3').textContent.toLowerCase();
-                if (title.includes(query)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
-        }
-
-        function executeWebSearch() {
-            const query = document.getElementById('site-search-input').value.trim();
-            if (query !== '') {
-                window.open('https://www.google.com/search?q=' + encodeURIComponent(query), '_blank');
-            } else {
-                alert('Please enter something to search on Google.');
-            }
+            document.getElementById('user-display-name').textContent = registeredUser.name;
+            document.getElementById('user-display-email').textContent = registeredUser.email;
+            document.getElementById('user-display-phone').textContent = registeredUser.phone;
         }
 
         function toggleProfileMenu() {
@@ -1811,6 +1708,13 @@
 
         function closeChangePasswordModal() {
             document.getElementById('change-password-modal').classList.remove('active');
+        }
+
+        function logout() {
+            document.getElementById('dashboard-view').style.display = 'none';
+            document.getElementById('auth-view').style.display = 'block';
+            document.getElementById('profile-dropdown').classList.remove('active');
+            showLogin();
         }
 
         // Modal Open / Close Functions
@@ -1865,7 +1769,7 @@
         function openMoneyTransferModal() { document.getElementById('money-transfer-modal').classList.add('active'); }
         function closeMoneyTransferModal() { document.getElementById('money-transfer-modal').classList.remove('active'); }
         function openMiniAtmModal() { document.getElementById('mini-atm-modal').classList.add('active'); }
-        function closeMiniAtmModal() { document.getElementById('close-mini-atm-modal').classList.remove('active'); }
+        function closeMiniAtmModal() { document.getElementById('mini-atm-modal').classList.remove('active'); }
         function openCashDepositModal() { document.getElementById('cash-deposit-modal').classList.add('active'); }
         function closeCashDepositModal() { document.getElementById('cash-deposit-modal').classList.remove('active'); }
         function openLoanRepaymentModal() { document.getElementById('loan-repayment-modal').classList.add('active'); }
