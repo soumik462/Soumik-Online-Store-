@@ -1609,6 +1609,7 @@
         }
         setInterval(nextSlide, 3500);
 
+        // LocalStorage থেকে ইউজারের তথ্য ফেচ করা যাতে একবার রেজিস্টার করার পর বারবার রেজিস্টার না করতে হয়
         let registeredUser = JSON.parse(localStorage.getItem('soumik_store_user')) || null;
 
         function showRegister() {
@@ -1635,11 +1636,12 @@
             }, 2500);
         }
 
+        // Register Form Handler
         document.getElementById('register-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            const name = document.getElementById('reg-name').value;
-            const phone = document.getElementById('reg-phone').value;
-            const email = document.getElementById('reg-email').value;
+            const name = document.getElementById('reg-name').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
             const password = document.getElementById('reg-password').value;
 
             registeredUser = { name, phone, email, password };
@@ -1648,6 +1650,7 @@
             showLogin();
         });
 
+        // Login Form Handler (Email অথবা Mobile নম্বর দিয়ে লগইন করার সুবিধা)
         document.getElementById('login-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const identifier = document.getElementById('login-identifier').value.trim();
@@ -1661,13 +1664,14 @@
 
             const isMatch = (registeredUser.email === identifier || registeredUser.phone === identifier);
             if (isMatch && registeredUser.password === password) {
-                showLoginToast(); // alert-এর পরিবর্তে সুন্দর টোস্ট নোটিফিকেশন কল করা হলো
+                showLoginToast();
                 loadDashboard();
             } else {
                 alert('Invalid Email/Mobile or Password. Please try again.');
             }
         });
 
+        // Change Password Form Handler
         document.getElementById('change-password-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const currentPass = document.getElementById('current-pass').value;
@@ -1712,6 +1716,7 @@
             showLogin();
         }
 
+        // Modal Open / Close Functions
         function openPanModal() { document.getElementById('pan-modal').classList.add('active'); }
         function closePanModal() { document.getElementById('pan-modal').classList.remove('active'); }
         function openVoterModal() { document.getElementById('voter-modal').classList.add('active'); }
@@ -1754,7 +1759,6 @@
         function closeGstModal() { document.getElementById('gst-modal').classList.remove('active'); }
         function openMobileRechargeModal() { document.getElementById('mobile-recharge-modal').classList.add('active'); }
         function closeMobileRechargeModal() { document.getElementById('mobile-recharge-modal').classList.remove('active'); }
-
         function openAadhaarModal() { document.getElementById('aadhaar-modal').classList.add('active'); }
         function closeAadhaarModal() { document.getElementById('aadhaar-modal').classList.remove('active'); }
         function openGasModal() { document.getElementById('gas-modal').classList.add('active'); }
