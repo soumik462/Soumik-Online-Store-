@@ -34,6 +34,30 @@
             overflow-x: hidden;
         }
 
+        /* --- Custom Toast Notification CSS --- */
+        .custom-toast {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: bold;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 9999;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .custom-toast.show {
+            bottom: 30px;
+            opacity: 1;
+        }
+
         /* --- Ultra Cinematic Auth Portal Background --- */
         #auth-view {
             min-height: 100vh;
@@ -878,6 +902,9 @@
 </head>
 <body>
 
+    <!-- Custom Toast Notification HTML -->
+    <div id="custom-toast" class="custom-toast">✅ Login Successful!</div>
+
     <!-- AUTHENTICATION CONTAINER -->
     <div id="auth-view">
         <!-- Cinematic Background Glowing Orbs -->
@@ -1554,11 +1581,9 @@
 
     <!-- Firebase SDK Integration -->
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAH86oVcKcBvKijEp6e0wQYfk1NOV0_Li0",
             authDomain: "soumik-online-store-b375e.firebaseapp.com",
@@ -1569,7 +1594,6 @@
             measurementId: "G-NHW6286XD9"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
     </script>
@@ -1602,6 +1626,15 @@
             input.type = input.type === "password" ? "text" : "password";
         }
 
+        // Custom Toast Notification Function
+        function showLoginToast() {
+            const toast = document.getElementById('custom-toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
         document.getElementById('register-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const name = document.getElementById('reg-name').value;
@@ -1628,7 +1661,7 @@
 
             const isMatch = (registeredUser.email === identifier || registeredUser.phone === identifier);
             if (isMatch && registeredUser.password === password) {
-                alert('Login Successful!');
+                showLoginToast(); // alert-এর পরিবর্তে সুন্দর টোস্ট নোটিফিকেশন কল করা হলো
                 loadDashboard();
             } else {
                 alert('Invalid Email/Mobile or Password. Please try again.');
