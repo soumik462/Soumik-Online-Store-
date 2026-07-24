@@ -1579,21 +1579,22 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Integration -->
+    <!-- Firebase SDK Integration (Updated v12.16.0) -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAH86oVcKcBvKijEp6e0wQYfk1NOV0_Li0",
-            authDomain: "soumik-online-store-b375e.firebaseapp.com",
-            projectId: "soumik-online-store-b375e",
-            storageBucket: "soumik-online-store-b375e.firebasestorage.app",
-            messagingSenderId: "553618037876",
-            appId: "1:553618037876:web:1e49af3f28b4a89eb64521",
-            measurementId: "G-NHW6286XD9"
+            apiKey: "AIzaSyARi2CVZbKd_UYFLUSuFMlw9ToLQNz1x-0",
+            authDomain: "soumik-online-store-app.firebaseapp.com",
+            projectId: "soumik-online-store-app",
+            storageBucket: "soumik-online-store-app.firebasestorage.app",
+            messagingSenderId: "192962755765",
+            appId: "1:192962755765:web:df1299e54241bd136712fc",
+            measurementId: "G-7166H94EBP"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
     </script>
@@ -1609,7 +1610,7 @@
         }
         setInterval(nextSlide, 3500);
 
-        // LocalStorage থেকে ইউজারের তথ্য ফেচ করা যাতে একবার রেজিস্টার করার পর বারবার রেজিস্টার না করতে হয়
+        // LocalStorage থেকে ইউজারের তথ্য ফেচ করা
         let registeredUser = JSON.parse(localStorage.getItem('soumik_store_user')) || null;
 
         function showRegister() {
@@ -1650,7 +1651,7 @@
             showLogin();
         });
 
-        // Login Form Handler (Email অথবা Mobile নম্বর দিয়ে লগইন করার সুবিধা)
+        // Login Form Handler
         document.getElementById('login-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const identifier = document.getElementById('login-identifier').value.trim();
