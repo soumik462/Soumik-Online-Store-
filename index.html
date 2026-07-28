@@ -937,7 +937,7 @@
                     <span class="toggle-password" onclick="togglePass('login-password')">👁️</span>
                 </div>
                 <a class="forgot-pass-link" onclick="showForgotPass()">Forgot Password?</a>
-                <button type="submit" class="btn">Login to Dashboard</button>
+                <button type="submit" class="btn" id="login-btn">Login to Dashboard</button>
             </form>
             <div class="auth-toggle-text">
                 Don't have an account? <a onclick="showRegister()">Register Here</a>
@@ -967,7 +967,7 @@
                     <input type="password" id="reg-password" required placeholder="Enter Password">
                     <span class="toggle-password" onclick="togglePass('reg-password')">👁️</span>
                 </div>
-                <button type="submit" class="btn">Register & Proceed</button>
+                <button type="submit" class="btn" id="register-btn">Register & Proceed</button>
             </form>
             <div class="auth-toggle-text">
                 Already registered? <a onclick="showLogin()">Login Here</a>
@@ -1579,10 +1579,11 @@
         </div>
     </div>
 
-    <!-- Firebase SDK Integration (Updated v12.16.0) -->
+    <!-- Firebase SDK Integration & Cloud Firestore Integration -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
+        import { getFirestore, doc, setDoc, getDoc, updateDoc, query, collection, where, getDocs } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyARi2CVZbKd_UYFLUSuFMlw9ToLQNz1x-0",
@@ -1597,6 +1598,179 @@
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
+        const db = getFirestore(app);
+
+        let activeUser = null;
+
+        // UI Functions global variables
+        window.showRegister = function() {
+            document.getElementById('login-card').style.display = 'none';
+            document.getElementById('register-card').style.display = 'block';
+        };
+
+        window.showLogin = function() {
+            document.getElementById('register-card').style.display = 'none';
+            document.getElementById('login-card').style.display = 'block';
+        };
+
+        window.togglePass = function(fieldId) {
+            const input = document.getElementById(fieldId);
+            input.type = input.type === "password" ? "text" : "password";
+        };
+
+        function showLoginToast() {
+            const toast = document.getElementById('custom-toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2500);
+        }
+
+        // --- Register Form Handler (Cloud Firestore) ---
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('register-btn');
+            btn.disabled = true;
+            btn.textContent = 'Registering...';
+
+            const name = document.getElementById('reg-name').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+            const email = document.getElementById('reg-email').value.trim().toLowerCase();
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                // ১. চেক করা মোবাইল বা ইমেইল আগে থেকেই ডেটাবেসে আছে কিনা
+                const emailRef = doc(db, "users", email);
+                const emailSnap = await getDoc(emailRef);
+
+                const phoneQuery = query(collection(db, "users"), where("phone", "==", phone));
+                const phoneQuerySnap = await getDocs(phoneQuery);
+
+                if (emailSnap.exists() || !phoneQuerySnap.empty) {
+                    alert('এই ইমেইল বা মোবাইল নাম্বারটি দিয়ে ইতোমধ্যে অ্যাকাউন্ট তৈরি করা আছে! দয়া করে সরাসরি লগইন করুন।');
+                    window.showLogin();
+                } else {
+                    // ২. Firestore ডেটাবেসে ব্যবহারকারীর তথ্য যুক্ত করা
+                    await setDoc(doc(db, "users", email), {
+                        name: name,
+                        phone: phone,
+                        email: email,
+                        password: password,
+                        createdAt: new Date().toISOString()
+                    });
+
+                    alert('রেজিস্ট্রেশন সফল হয়েছে! এখন যে কোনো ডিভাইস থেকে লগইন করতে পারবেন।');
+                    document.getElementById('register-form').reset();
+                    window.showLogin();
+                }
+            } catch (err) {
+                console.error("Register Error:", err);
+                alert('Error registering user: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Register & Proceed';
+            }
+        });
+
+        // --- Login Form Handler (Cloud Firestore) ---
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('login-btn');
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+
+            const identifier = document.getElementById('login-identifier').value.trim().toLowerCase();
+            const password = document.getElementById('login-password').value;
+
+            try {
+                let userFound = null;
+
+                // ১. ইমেইল দিয়ে সার্চ করা
+                const docRef = doc(db, "users", identifier);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    userFound = docSnap.data();
+                } else {
+                    // ২. যদি ইমেইল না হয় তবে ফোন নম্বর দিয়ে চেক করা
+                    const q = query(collection(db, "users"), where("phone", "==", identifier));
+                    const querySnapshot = await getDocs(q);
+                    querySnapshot.forEach((doc) => {
+                        userFound = doc.data();
+                    });
+                }
+
+                if (!userFound) {
+                    alert('এই অ্যাকাউন্টটি পাওয়া যায়নি! দয়া করে আগে রেজিস্ট্রেশন করুন।');
+                    window.showRegister();
+                } else if (userFound.password === password) {
+                    activeUser = userFound;
+                    showLoginToast();
+                    loadDashboard();
+                } else {
+                    alert('ভুল পাসওয়ার্ড দিয়েছেন! আবার চেষ্টা করুন।');
+                }
+            } catch (err) {
+                console.error("Login Error:", err);
+                alert('Error logging in: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Login to Dashboard';
+            }
+        });
+
+        // --- Change Password Form Handler ---
+        document.getElementById('change-password-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const currentPass = document.getElementById('current-pass').value;
+            const newPass = document.getElementById('new-pass').value;
+
+            if (activeUser && activeUser.password === currentPass) {
+                try {
+                    const userRef = doc(db, "users", activeUser.email);
+                    await updateDoc(userRef, {
+                        password: newPass
+                    });
+                    activeUser.password = newPass;
+                    alert('পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে!');
+                    window.closeChangePasswordModal();
+                    document.getElementById('change-password-form').reset();
+                } catch (err) {
+                    alert('Error updating password: ' + err.message);
+                }
+            } else {
+                alert('বর্তমান পাসওয়ার্ডটি সঠিক নয়!');
+            }
+        });
+
+        function loadDashboard() {
+            document.getElementById('auth-view').style.display = 'none';
+            document.getElementById('dashboard-view').style.display = 'flex';
+            document.getElementById('user-display-name').textContent = activeUser.name;
+            document.getElementById('user-display-email').textContent = activeUser.email;
+            document.getElementById('user-display-phone').textContent = activeUser.phone;
+        }
+
+        window.toggleProfileMenu = function() {
+            document.getElementById('profile-dropdown').classList.toggle('active');
+        };
+
+        window.openChangePasswordModal = function() {
+            document.getElementById('profile-dropdown').classList.remove('active');
+            document.getElementById('change-password-modal').classList.add('active');
+        };
+
+        window.closeChangePasswordModal = function() {
+            document.getElementById('change-password-modal').classList.remove('active');
+        };
+
+        window.logout = function() {
+            activeUser = null;
+            document.getElementById('dashboard-view').style.display = 'none';
+            document.getElementById('auth-view').style.display = 'flex';
+            document.getElementById('profile-dropdown').classList.remove('active');
+            window.showLogin();
+        };
     </script>
 
     <script>
@@ -1609,113 +1783,6 @@
             slides[currentSlide].classList.add('active');
         }
         setInterval(nextSlide, 3500);
-
-        // LocalStorage থেকে ইউজারের তথ্য ফেচ করা
-        let registeredUser = JSON.parse(localStorage.getItem('soumik_store_user')) || null;
-
-        function showRegister() {
-            document.getElementById('login-card').style.display = 'none';
-            document.getElementById('register-card').style.display = 'block';
-        }
-
-        function showLogin() {
-            document.getElementById('register-card').style.display = 'none';
-            document.getElementById('login-card').style.display = 'block';
-        }
-
-        function togglePass(fieldId) {
-            const input = document.getElementById(fieldId);
-            input.type = input.type === "password" ? "text" : "password";
-        }
-
-        // Custom Toast Notification Function
-        function showLoginToast() {
-            const toast = document.getElementById('custom-toast');
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 2500);
-        }
-
-        // Register Form Handler
-        document.getElementById('register-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value.trim();
-            const phone = document.getElementById('reg-phone').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const password = document.getElementById('reg-password').value;
-
-            registeredUser = { name, phone, email, password };
-            localStorage.setItem('soumik_store_user', JSON.stringify(registeredUser));
-            alert('Registration Successful! Please log in now.');
-            showLogin();
-        });
-
-        // Login Form Handler
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const identifier = document.getElementById('login-identifier').value.trim();
-            const password = document.getElementById('login-password').value;
-
-            if (!registeredUser) {
-                alert('No account found! Please register first.');
-                showRegister();
-                return;
-            }
-
-            const isMatch = (registeredUser.email === identifier || registeredUser.phone === identifier);
-            if (isMatch && registeredUser.password === password) {
-                showLoginToast();
-                loadDashboard();
-            } else {
-                alert('Invalid Email/Mobile or Password. Please try again.');
-            }
-        });
-
-        // Change Password Form Handler
-        document.getElementById('change-password-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const currentPass = document.getElementById('current-pass').value;
-            const newPass = document.getElementById('new-pass').value;
-
-            if (registeredUser && registeredUser.password === currentPass) {
-                registeredUser.password = newPass;
-                localStorage.setItem('soumik_store_user', JSON.stringify(registeredUser));
-                alert('Password changed successfully!');
-                closeChangePasswordModal();
-                document.getElementById('change-password-form').reset();
-            } else {
-                alert('Current password is incorrect!');
-            }
-        });
-
-        function loadDashboard() {
-            document.getElementById('auth-view').style.display = 'none';
-            document.getElementById('dashboard-view').style.display = 'flex';
-            document.getElementById('user-display-name').textContent = registeredUser.name;
-            document.getElementById('user-display-email').textContent = registeredUser.email;
-            document.getElementById('user-display-phone').textContent = registeredUser.phone;
-        }
-
-        function toggleProfileMenu() {
-            document.getElementById('profile-dropdown').classList.toggle('active');
-        }
-
-        function openChangePasswordModal() {
-            document.getElementById('profile-dropdown').classList.remove('active');
-            document.getElementById('change-password-modal').classList.add('active');
-        }
-
-        function closeChangePasswordModal() {
-            document.getElementById('change-password-modal').classList.remove('active');
-        }
-
-        function logout() {
-            document.getElementById('dashboard-view').style.display = 'none';
-            document.getElementById('auth-view').style.display = 'block';
-            document.getElementById('profile-dropdown').classList.remove('active');
-            showLogin();
-        }
 
         // Modal Open / Close Functions
         function openPanModal() { document.getElementById('pan-modal').classList.add('active'); }
