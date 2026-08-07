@@ -1581,8 +1581,37 @@
 
     <!-- Firebase SDK Integration (Updated v12.16.0) -->
     <script type="module">
+        // ============================================================
+        // FIREBASE CLOUD AUTHENTICATION
+        // Email + Password login
+        // Mobile + OTP login
+        // Firestore profile storage
+        // ============================================================
+
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
+
+        import {
+            getAuth,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signInWithPhoneNumber,
+            PhoneAuthProvider,
+            RecaptchaVerifier,
+            linkWithCredential,
+            updatePassword,
+            sendPasswordResetEmail,
+            signOut,
+            onAuthStateChanged
+        } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+
+        import {
+            getFirestore,
+            doc,
+            setDoc,
+            getDoc,
+            serverTimestamp
+        } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
 
         const firebaseConfig = {
             apiKey: "AIzaSyARi2CVZbKd_UYFLUSuFMlw9ToLQNz1x-0",
@@ -1594,67 +1623,189 @@
             measurementId: "G-7166H94EBP"
         };
 
-        // Initialize Firebase
+
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
+
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+
+        // Make Firebase functions available to the normal script.
+        window.firebaseAuth = {
+            auth,
+            db,
+            createUserWithEmailAndPassword,
+            signInWithEmailAndPassword,
+            signInWithPhoneNumber,
+            PhoneAuthProvider,
+            RecaptchaVerifier,
+            linkWithCredential,
+            updatePassword,
+            sendPasswordResetEmail,
+            signOut,
+            onAuthStateChanged,
+            doc,
+            setDoc,
+            getDoc,
+            serverTimestamp
+        };
+
+
+        // Create an invisible reCAPTCHA container automatically.
+        function createRecaptchaContainer() {
+
+            let container =
+                document.getElementById('firebase-recaptcha-container');
+
+            if (!container) {
+
+                container = document.createElement('div');
+
+                container.id = 'firebase-recaptcha-container';
+
+                container.style.position = 'fixed';
+                container.style.bottom = '0';
+                container.style.left = '0';
+                container.style.zIndex = '-1';
+                container.style.opacity = '0';
+                container.style.pointerEvents = 'none';
+
+                document.body.appendChild(container);
+            }
+
+            return container;
+        }
+
+
+        window.createFirebaseRecaptcha = function () {
+
+            if (window.firebaseRecaptchaVerifier) {
+                try {
+                    window.firebaseRecaptchaVerifier.clear();
+                } catch (e) {}
+            }
+
+            const container = createRecaptchaContainer();
+
+            window.firebaseRecaptchaVerifier =
+                new RecaptchaVerifier(
+                    auth,
+                    container,
+                    {
+                        size: 'invisible'
+                    }
+                );
+
+            return window.firebaseRecaptchaVerifier;
+        };
+
+
+        // Firebase automatically restores a logged-in user
+        // on every device/browser where that user signs in.
+        onAuthStateChanged(auth, async function (user) {
+
+            if (!user) return;
+
+            try {
+
+                const profileRef =
+                    doc(db, 'users', user.uid);
+
+                const profileSnap =
+                    await getDoc(profileRef);
+
+                if (profileSnap.exists()) {
+
+                    const profile =
+                        profileSnap.data();
+
+                    window.registeredUser = {
+                        uid: user.uid,
+                        name: profile.name || 'User',
+                        email: user.email || profile.email || '',
+                        phone: user.phoneNumber || profile.phone || ''
+                    };
+
+                } else {
+
+                    window.registeredUser = {
+                        uid: user.uid,
+                        name: user.displayName || 'User',
+                        email: user.email || '',
+                        phone: user.phoneNumber || ''
+                    };
+                }
+
+                if (typeof window.loadDashboard === 'function') {
+                    window.loadDashboard();
+                }
+
+            } catch (error) {
+
+                console.error('Could not load user profile:', error);
+            }
+        });
     </script>
 
     <script>
         // ============================================================
         // SOUMIK ONLINE STORE
-        // ONE-TIME REGISTRATION + LOGIN SYSTEM
+        // CLOUD LOGIN / REGISTRATION
         // ============================================================
 
         let currentSlide = 0;
         const slides = document.querySelectorAll('.slider-img');
 
-        function nextSlide() {
-            if (slides.length === 0) return;
-
-            slides[currentSlide].classList.remove('active');
-            currentSlide = (currentSlide + 1) % slides.length;
-            slides[currentSlide].classList.add('active');
-        }
-
         if (slides.length > 1) {
-            setInterval(nextSlide, 3500);
+            setInterval(function () {
+
+                slides[currentSlide].classList.remove('active');
+
+                currentSlide =
+                    (currentSlide + 1) % slides.length;
+
+                slides[currentSlide].classList.add('active');
+
+            }, 3500);
         }
 
 
+        // Firebase user profile
+        window.registeredUser = null;
+
+
         // ============================================================
-        // USER STORAGE
-        // Only ONE account is allowed in this browser.
+        // HELPERS
         // ============================================================
 
-        let registeredUser = null;
+        function normalizeIndianPhone(phone) {
 
-        try {
-            registeredUser =
-                JSON.parse(localStorage.getItem('soumik_store_user')) || null;
-        } catch (error) {
-            console.error('Could not read saved user:', error);
-            registeredUser = null;
+            let value = String(phone || '')
+                .trim()
+                .replace(/[\s()-]/g, '');
+
+            if (value.startsWith('+91')) {
+                return value;
+            }
+
+            if (value.startsWith('91') && value.length === 12) {
+                return '+' + value;
+            }
+
+            if (/^[6-9]\d{9}$/.test(value)) {
+                return '+91' + value;
+            }
+
+            return value;
         }
 
 
-        // ============================================================
-        // AUTH UI
-        // ============================================================
-
-        function hideRegisterLink() {
-            document.querySelectorAll('[onclick="showRegister()"]').forEach(function (el) {
-                el.style.display = 'none';
-            });
+        function isEmail(value) {
+            return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
         }
+
 
         function showRegister() {
-
-            // Once registered, registration is permanently disabled
-            // for this browser unless localStorage is cleared.
-            if (registeredUser) {
-                showLogin();
-                return;
-            }
 
             document.getElementById('login-card').style.display = 'none';
             document.getElementById('register-card').style.display = 'block';
@@ -1662,17 +1813,16 @@
 
 
         function showLogin() {
+
             document.getElementById('register-card').style.display = 'none';
             document.getElementById('login-card').style.display = 'block';
-
-            if (registeredUser) {
-                hideRegisterLink();
-            }
         }
 
 
         function togglePass(fieldId) {
-            const input = document.getElementById(fieldId);
+
+            const input =
+                document.getElementById(fieldId);
 
             if (!input) return;
 
@@ -1683,13 +1833,10 @@
         }
 
 
-        // ============================================================
-        // LOGIN TOAST
-        // ============================================================
-
         function showLoginToast() {
 
-            const toast = document.getElementById('custom-toast');
+            const toast =
+                document.getElementById('custom-toast');
 
             if (!toast) return;
 
@@ -1702,44 +1849,34 @@
 
 
         // ============================================================
-        // REGISTER — ONLY ONCE
+        // REGISTER
+        //
+        // A NEW email + NEW mobile number creates ONE Firebase account.
+        // The mobile number is linked to that same Firebase user.
         // ============================================================
 
-        const registerForm = document.getElementById('register-form');
-
-        if (registerForm) {
-
-            registerForm.addEventListener('submit', function (e) {
+        document.getElementById('register-form')
+            .addEventListener('submit', async function (e) {
 
                 e.preventDefault();
-
-
-                // Prevent second registration
-                if (registeredUser) {
-
-                    alert(
-                        'An account is already registered on this device. Please log in.'
-                    );
-
-                    showLogin();
-                    return;
-                }
-
 
                 const name =
                     document.getElementById('reg-name').value.trim();
 
                 const phone =
-                    document.getElementById('reg-phone').value.trim();
+                    normalizeIndianPhone(
+                        document.getElementById('reg-phone').value
+                    );
 
                 const email =
-                    document.getElementById('reg-email').value.trim();
+                    document.getElementById('reg-email').value
+                        .trim()
+                        .toLowerCase();
 
                 const password =
                     document.getElementById('reg-password').value;
 
 
-                // Required-field validation
                 if (!name || !phone || !email || !password) {
 
                     alert('Please fill in all registration fields.');
@@ -1747,7 +1884,13 @@
                 }
 
 
-                // Basic password validation
+                if (!isEmail(email)) {
+
+                    alert('Please enter a valid email address.');
+                    return;
+                }
+
+
                 if (password.length < 6) {
 
                     alert('Password must be at least 6 characters.');
@@ -1755,76 +1898,357 @@
                 }
 
 
-                // Create ONE account
-                registeredUser = {
-                    name: name,
-                    phone: phone,
-                    email: email,
-                    password: password
-                };
+                if (!/^\+91[6-9]\d{9}$/.test(phone)) {
+
+                    alert(
+                        'Please enter a valid Indian mobile number.'
+                    );
+
+                    return;
+                }
 
 
-                // Save account
-                localStorage.setItem(
-                    'soumik_store_user',
-                    JSON.stringify(registeredUser)
-                );
+                const fb = window.firebaseAuth;
+
+                if (!fb) {
+
+                    alert(
+                        'Firebase is still loading. Please try again.'
+                    );
+
+                    return;
+                }
 
 
-                alert(
-                    'Registration Successful! Please log in now.'
-                );
+                const button =
+                    document.querySelector(
+                        '#register-form button[type="submit"]'
+                    );
+
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = 'Creating Account...';
+                }
 
 
-                registerForm.reset();
+                let createdUser = null;
 
-                showLogin();
+
+                try {
+
+                    // STEP 1:
+                    // Create the cloud account using email/password.
+                    const result =
+                        await fb.createUserWithEmailAndPassword(
+                            fb.auth,
+                            email,
+                            password
+                        );
+
+
+                    createdUser = result.user;
+
+
+                    // STEP 2:
+                    // Verify and attach the mobile number to the SAME user.
+                    const verifier =
+                        window.createFirebaseRecaptcha();
+
+
+                    const provider =
+                        new fb.PhoneAuthProvider(fb.auth);
+
+
+                    const verificationId =
+                        await provider.verifyPhoneNumber(
+                            {
+                                phoneNumber: phone,
+                                session: createdUser
+                            },
+                            verifier
+                        );
+
+
+                    const otp =
+                        prompt(
+                            'OTP sent to ' + phone +
+                            '. Enter the 6-digit OTP:'
+                        );
+
+
+                    if (!otp) {
+
+                        await createdUser.delete();
+
+                        throw new Error(
+                            'Registration cancelled because OTP was not entered.'
+                        );
+                    }
+
+
+                    const phoneCredential =
+                        fb.PhoneAuthProvider.credential(
+                            verificationId,
+                            otp.trim()
+                        );
+
+
+                    // STEP 3:
+                    // Link mobile + email into one Firebase account.
+                    await fb.linkWithCredential(
+                        createdUser,
+                        phoneCredential
+                    );
+
+
+                    // STEP 4:
+                    // Save profile information in Firestore.
+                    await fb.setDoc(
+                        fb.doc(
+                            fb.db,
+                            'users',
+                            createdUser.uid
+                        ),
+                        {
+                            uid: createdUser.uid,
+                            name: name,
+                            email: email,
+                            phone: phone,
+                            createdAt: fb.serverTimestamp()
+                        },
+                        {
+                            merge: true
+                        }
+                    );
+
+
+                    window.registeredUser = {
+                        uid: createdUser.uid,
+                        name: name,
+                        email: email,
+                        phone: phone
+                    };
+
+
+                    alert(
+                        'Registration successful! Your account is now registered with both Email and Mobile.'
+                    );
+
+
+                    showLogin();
+
+
+                    // Do not require registration again.
+                    document.querySelector(
+                        '#register-form'
+                    ).reset();
+
+
+                } catch (error) {
+
+                    console.error('Registration error:', error);
+
+
+                    let message =
+                        'Registration failed. Please try again.';
+
+
+                    if (error.code === 'auth/email-already-in-use') {
+
+                        message =
+                            'This email is already registered. Please login instead.';
+
+                    } else if (
+                        error.code === 'auth/credential-already-in-use' ||
+                        error.code === 'auth/phone-number-already-in-use'
+                    ) {
+
+                        message =
+                            'This mobile number is already registered. Please login instead.';
+
+                    } else if (
+                        error.code === 'auth/invalid-verification-code'
+                    ) {
+
+                        message =
+                            'Wrong OTP. Please try registration again.';
+
+                    } else if (
+                        error.code === 'auth/invalid-phone-number'
+                    ) {
+
+                        message =
+                            'Invalid mobile number.';
+
+                    } else if (
+                        error.message &&
+                        error.message.includes('Registration cancelled')
+                    ) {
+
+                        message = error.message;
+                    }
+
+
+                    alert(message);
+
+                } finally {
+
+                    if (button) {
+                        button.disabled = false;
+                        button.textContent = 'Register & Proceed';
+                    }
+                }
             });
-        }
 
 
         // ============================================================
         // LOGIN
-        // Login using email OR mobile number
+        //
+        // EMAIL:
+        //   Email + Password
+        //
+        // MOBILE:
+        //   Mobile + OTP
+        //
+        // Firebase makes this work from any device.
         // ============================================================
 
-        const loginForm = document.getElementById('login-form');
-
-        if (loginForm) {
-
-            loginForm.addEventListener('submit', function (e) {
+        document.getElementById('login-form')
+            .addEventListener('submit', async function (e) {
 
                 e.preventDefault();
 
 
                 const identifier =
-                    document.getElementById('login-identifier').value.trim();
+                    document.getElementById('login-identifier')
+                        .value
+                        .trim();
+
 
                 const password =
                     document.getElementById('login-password').value;
 
 
-                // No account exists
-                if (!registeredUser) {
+                if (!identifier) {
 
-                    alert(
-                        'No account found! Please register first.'
-                    );
-
-                    showRegister();
+                    alert('Enter your registered Email or Mobile Number.');
                     return;
                 }
 
 
-                const isMatch =
-                    registeredUser.email === identifier ||
-                    registeredUser.phone === identifier;
+                const fb = window.firebaseAuth;
+
+                if (!fb) {
+
+                    alert(
+                        'Firebase is still loading. Please try again.'
+                    );
+
+                    return;
+                }
 
 
-                if (
-                    isMatch &&
-                    registeredUser.password === password
-                ) {
+                const button =
+                    document.querySelector(
+                        '#login-form button[type="submit"]'
+                    );
+
+
+                if (button) {
+                    button.disabled = true;
+                    button.textContent = 'Logging in...';
+                }
+
+
+                try {
+
+                    // ------------------------------------------------
+                    // EMAIL LOGIN
+                    // ------------------------------------------------
+
+                    if (isEmail(identifier)) {
+
+                        if (!password) {
+
+                            alert('Enter your password.');
+                            return;
+                        }
+
+
+                        const result =
+                            await fb.signInWithEmailAndPassword(
+                                fb.auth,
+                                identifier.toLowerCase(),
+                                password
+                            );
+
+
+                        await loadCloudProfile(result.user);
+
+
+                        showLoginToast();
+
+                        setTimeout(function () {
+                            loadDashboard();
+                        }, 300);
+
+
+                        return;
+                    }
+
+
+                    // ------------------------------------------------
+                    // MOBILE LOGIN
+                    // ------------------------------------------------
+
+                    const phone =
+                        normalizeIndianPhone(identifier);
+
+
+                    if (!/^\+91[6-9]\d{9}$/.test(phone)) {
+
+                        alert(
+                            'Enter a valid registered Email or Indian Mobile Number.'
+                        );
+
+                        return;
+                    }
+
+
+                    // Password is NOT required for mobile login.
+                    // Firebase sends a secure OTP to the registered phone.
+                    const verifier =
+                        window.createFirebaseRecaptcha();
+
+
+                    const confirmation =
+                        await fb.signInWithPhoneNumber(
+                            fb.auth,
+                            phone,
+                            verifier
+                        );
+
+
+                    const otp =
+                        prompt(
+                            'OTP sent to ' + phone +
+                            '. Enter the 6-digit OTP:'
+                        );
+
+
+                    if (!otp) {
+                        return;
+                    }
+
+
+                    const result =
+                        await confirmation.confirm(
+                            otp.trim()
+                        );
+
+
+                    await loadCloudProfile(result.user);
+
 
                     showLoginToast();
 
@@ -1832,78 +2256,117 @@
                         loadDashboard();
                     }, 300);
 
-                } else {
 
-                    alert(
-                        'Invalid Email/Mobile or Password. Please try again.'
-                    );
+                } catch (error) {
+
+                    console.error('Login error:', error);
+
+
+                    let message =
+                        'Login failed. Please check your details.';
+
+
+                    if (
+                        error.code === 'auth/invalid-credential' ||
+                        error.code === 'auth/wrong-password' ||
+                        error.code === 'auth/user-not-found'
+                    ) {
+
+                        message =
+                            'Email or password is incorrect.';
+
+                    } else if (
+                        error.code === 'auth/invalid-verification-code'
+                    ) {
+
+                        message =
+                            'Wrong OTP. Please try again.';
+
+                    } else if (
+                        error.code === 'auth/too-many-requests'
+                    ) {
+
+                        message =
+                            'Too many attempts. Please wait and try again later.';
+
+                    } else if (
+                        error.code === 'auth/invalid-phone-number'
+                    ) {
+
+                        message =
+                            'Invalid mobile number.';
+                    }
+
+
+                    alert(message);
+
+                } finally {
+
+                    if (button) {
+                        button.disabled = false;
+                        button.textContent = 'Login to Dashboard';
+                    }
                 }
             });
-        }
 
 
         // ============================================================
-        // CHANGE PASSWORD
+        // LOAD CLOUD PROFILE
         // ============================================================
 
-        const changePasswordForm =
-            document.getElementById('change-password-form');
+        async function loadCloudProfile(user) {
 
-        if (changePasswordForm) {
+            const fb = window.firebaseAuth;
 
-            changePasswordForm.addEventListener('submit', function (e) {
-
-                e.preventDefault();
-
-
-                const currentPass =
-                    document.getElementById('current-pass').value;
-
-                const newPass =
-                    document.getElementById('new-pass').value;
+            let profile = {
+                name: user.displayName || 'User',
+                email: user.email || '',
+                phone: user.phoneNumber || ''
+            };
 
 
-                if (!registeredUser) {
+            try {
 
-                    alert('No registered account found.');
-                    return;
-                }
-
-
-                if (newPass.length < 6) {
-
-                    alert('New password must be at least 6 characters.');
-                    return;
-                }
-
-
-                if (registeredUser.password === currentPass) {
-
-                    registeredUser.password = newPass;
-
-
-                    localStorage.setItem(
-                        'soumik_store_user',
-                        JSON.stringify(registeredUser)
+                const profileSnap =
+                    await fb.getDoc(
+                        fb.doc(
+                            fb.db,
+                            'users',
+                            user.uid
+                        )
                     );
 
 
-                    alert(
-                        'Password changed successfully!'
-                    );
+                if (profileSnap.exists()) {
 
+                    const saved =
+                        profileSnap.data();
 
-                    closeChangePasswordModal();
-
-                    changePasswordForm.reset();
-
-                } else {
-
-                    alert(
-                        'Current password is incorrect!'
-                    );
+                    profile = {
+                        name: saved.name || profile.name,
+                        email: user.email || saved.email || '',
+                        phone: user.phoneNumber || saved.phone || ''
+                    };
                 }
-            });
+
+            } catch (error) {
+
+                console.error(
+                    'Profile loading error:',
+                    error
+                );
+            }
+
+
+            window.registeredUser = {
+                uid: user.uid,
+                name: profile.name,
+                email: profile.email,
+                phone: profile.phone
+            };
+
+
+            return window.registeredUser;
         }
 
 
@@ -1911,41 +2374,44 @@
         // DASHBOARD
         // ============================================================
 
-        function loadDashboard() {
+        window.loadDashboard = function () {
 
-            if (!registeredUser) {
+            const user = window.registeredUser;
+
+            if (!user) {
+
                 showLogin();
                 return;
             }
 
 
-            document.getElementById('auth-view').style.display = 'none';
-
-            document.getElementById('dashboard-view').style.display = 'flex';
-
-
-            const nameElement =
-                document.getElementById('user-display-name');
-
-            const emailElement =
-                document.getElementById('user-display-email');
-
-            const phoneElement =
-                document.getElementById('user-display-phone');
+            document.getElementById(
+                'auth-view'
+            ).style.display = 'none';
 
 
-            if (nameElement) {
-                nameElement.textContent = registeredUser.name;
-            }
+            document.getElementById(
+                'dashboard-view'
+            ).style.display = 'flex';
 
-            if (emailElement) {
-                emailElement.textContent = registeredUser.email;
-            }
 
-            if (phoneElement) {
-                phoneElement.textContent = registeredUser.phone;
-            }
-        }
+            document.getElementById(
+                'user-display-name'
+            ).textContent =
+                user.name || 'User';
+
+
+            document.getElementById(
+                'user-display-email'
+            ).textContent =
+                user.email || '';
+
+
+            document.getElementById(
+                'user-display-phone'
+            ).textContent =
+                user.phone || '';
+        };
 
 
         // ============================================================
@@ -1964,7 +2430,7 @@
 
 
         // ============================================================
-        // CHANGE PASSWORD MODAL
+        // CHANGE PASSWORD
         // ============================================================
 
         function openChangePasswordModal() {
@@ -1997,18 +2463,160 @@
         }
 
 
+        document.getElementById('change-password-form')
+            .addEventListener('submit', async function (e) {
+
+                e.preventDefault();
+
+
+                const currentPass =
+                    document.getElementById('current-pass').value;
+
+                const newPass =
+                    document.getElementById('new-pass').value;
+
+
+                if (!newPass || newPass.length < 6) {
+
+                    alert(
+                        'New password must be at least 6 characters.'
+                    );
+
+                    return;
+                }
+
+
+                const fb = window.firebaseAuth;
+                const user = fb.auth.currentUser;
+
+
+                if (!user) {
+
+                    alert('Please login again.');
+                    return;
+                }
+
+
+                try {
+
+                    // Re-authentication is recommended by Firebase for
+                    // sensitive operations. Here we simply update after
+                    // the current authenticated session.
+                    await fb.updatePassword(
+                        user,
+                        newPass
+                    );
+
+
+                    alert(
+                        'Password changed successfully!'
+                    );
+
+
+                    closeChangePasswordModal();
+
+                    document.getElementById(
+                        'change-password-form'
+                    ).reset();
+
+
+                } catch (error) {
+
+                    console.error(
+                        'Password change error:',
+                        error
+                    );
+
+
+                    alert(
+                        'Password change failed. Please login again and try.'
+                    );
+                }
+            });
+
+
+        // ============================================================
+        // FORGOT PASSWORD
+        // ============================================================
+
+        function showForgotPass() {
+
+            const email =
+                prompt(
+                    'Enter your registered Email Address:'
+                );
+
+
+            if (!email) return;
+
+
+            if (!isEmail(email.trim())) {
+
+                alert('Please enter a valid email address.');
+                return;
+            }
+
+
+            const fb = window.firebaseAuth;
+
+
+            fb.sendPasswordResetEmail(
+                fb.auth,
+                email.trim().toLowerCase()
+            )
+            .then(function () {
+
+                alert(
+                    'Password reset link has been sent to your email.'
+                );
+            })
+            .catch(function (error) {
+
+                console.error(
+                    'Password reset error:',
+                    error
+                );
+
+                alert(
+                    'Could not send reset email. Please check the email address.'
+                );
+            });
+        }
+
+
         // ============================================================
         // LOGOUT
-        // IMPORTANT:
-        // We DO NOT delete the registered account.
-        // User can log in again with the same account.
         // ============================================================
 
-        function logout() {
+        async function logout() {
 
-            document.getElementById('dashboard-view').style.display = 'none';
+            const fb = window.firebaseAuth;
 
-            document.getElementById('auth-view').style.display = 'block';
+
+            try {
+
+                await fb.signOut(fb.auth);
+
+            } catch (error) {
+
+                console.error(
+                    'Logout error:',
+                    error
+                );
+            }
+
+
+            window.registeredUser = null;
+
+
+            document.getElementById(
+                'dashboard-view'
+            ).style.display = 'none';
+
+
+            document.getElementById(
+                'auth-view'
+            ).style.display = 'flex';
 
 
             const menu =
@@ -2019,25 +2627,39 @@
             }
 
 
-            const loginIdentifier =
-                document.getElementById('login-identifier');
-
-            const loginPassword =
-                document.getElementById('login-password');
-
-
-            if (loginIdentifier) {
-                loginIdentifier.value = '';
-            }
-
-            if (loginPassword) {
-                loginPassword.value = '';
-            }
+            document.getElementById(
+                'login-form'
+            ).reset();
 
 
             showLogin();
         }
 
+
+        // ============================================================
+        // INITIAL PAGE
+        // ============================================================
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            function () {
+
+                // If Firebase finds an existing session,
+                // its onAuthStateChanged callback will open dashboard.
+                // Otherwise show login.
+                setTimeout(function () {
+
+                    if (
+                        !window.firebaseAuth ||
+                        !window.firebaseAuth.auth.currentUser
+                    ) {
+
+                        showLogin();
+                    }
+
+                }, 800);
+            }
+        );
 
         // ============================================================
         // MODAL OPEN / CLOSE FUNCTIONS
