@@ -1594,11 +1594,8 @@
             getAuth,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
-            signInWithPhoneNumber,
-            PhoneAuthProvider,
-            RecaptchaVerifier,
-            linkWithCredential,
             updatePassword,
+            sendEmailVerification,
             sendPasswordResetEmail,
             signOut,
             onAuthStateChanged
@@ -1636,11 +1633,8 @@
             db,
             createUserWithEmailAndPassword,
             signInWithEmailAndPassword,
-            signInWithPhoneNumber,
-            PhoneAuthProvider,
-            RecaptchaVerifier,
-            linkWithCredential,
             updatePassword,
+            sendEmailVerification,
             sendPasswordResetEmail,
             signOut,
             onAuthStateChanged,
@@ -1648,55 +1642,6 @@
             setDoc,
             getDoc,
             serverTimestamp
-        };
-
-
-        // Create an invisible reCAPTCHA container automatically.
-        function createRecaptchaContainer() {
-
-            let container =
-                document.getElementById('firebase-recaptcha-container');
-
-            if (!container) {
-
-                container = document.createElement('div');
-
-                container.id = 'firebase-recaptcha-container';
-
-                container.style.position = 'fixed';
-                container.style.bottom = '0';
-                container.style.left = '0';
-                container.style.zIndex = '-1';
-                container.style.opacity = '0';
-                container.style.pointerEvents = 'none';
-
-                document.body.appendChild(container);
-            }
-
-            return container;
-        }
-
-
-        window.createFirebaseRecaptcha = function () {
-
-            if (window.firebaseRecaptchaVerifier) {
-                try {
-                    window.firebaseRecaptchaVerifier.clear();
-                } catch (e) {}
-            }
-
-            const container = createRecaptchaContainer();
-
-            window.firebaseRecaptchaVerifier =
-                new RecaptchaVerifier(
-                    auth,
-                    container,
-                    {
-                        size: 'invisible'
-                    }
-                );
-
-            return window.firebaseRecaptchaVerifier;
         };
 
 
@@ -1736,9 +1681,8 @@
                     };
                 }
 
-                if (typeof window.loadDashboard === 'function') {
-                    window.loadDashboard();
-                }
+                // Do not automatically open the dashboard on page load.
+                // Login is performed explicitly by the user.
 
             } catch (error) {
 
@@ -1851,8 +1795,13 @@
         // ============================================================
         // REGISTER
         //
-        // A NEW email + NEW mobile number creates ONE Firebase account.
-        // The mobile number is linked to that same Firebase user.
+        // Phone OTP has intentionally been removed.
+        // This prevents Firebase Phone Auth / reCAPTCHA configuration
+        // errors such as auth/configuration-not-found.
+        //
+        // Registration uses:
+        // Name + Mobile Number + Email + Password
+        // Email verification is sent after account creation.
         // ============================================================
 
         document.getElementById('register-form')
@@ -1876,49 +1825,32 @@
                 const password =
                     document.getElementById('reg-password').value;
 
-
                 if (!name || !phone || !email || !password) {
-
                     alert('Please fill in all registration fields.');
                     return;
                 }
 
-
                 if (!isEmail(email)) {
-
                     alert('Please enter a valid email address.');
                     return;
                 }
 
-
                 if (password.length < 6) {
-
                     alert('Password must be at least 6 characters.');
                     return;
                 }
 
-
                 if (!/^\+91[6-9]\d{9}$/.test(phone)) {
-
-                    alert(
-                        'Please enter a valid Indian mobile number.'
-                    );
-
+                    alert('Please enter a valid 10-digit Indian mobile number.');
                     return;
                 }
-
 
                 const fb = window.firebaseAuth;
 
                 if (!fb) {
-
-                    alert(
-                        'Firebase is still loading. Please try again.'
-                    );
-
+                    alert('Firebase is still loading. Please try again.');
                     return;
                 }
-
 
                 const button =
                     document.querySelector(
@@ -1930,14 +1862,9 @@
                     button.textContent = 'Creating Account...';
                 }
 
-
-                let createdUser = null;
-
-
                 try {
 
-                    // STEP 1:
-                    // Create the cloud account using email/password.
+                    // Create cloud account using email + password.
                     const result =
                         await fb.createUserWithEmailAndPassword(
                             fb.auth,
@@ -1945,75 +1872,27 @@
                             password
                         );
 
-
-                    createdUser = result.user;
-
-
-                    // STEP 2:
-                    // Verify and attach the mobile number to the SAME user.
-                    const verifier =
-                        window.createFirebaseRecaptcha();
+                    const user = result.user;
 
 
-                    const provider =
-                        new fb.PhoneAuthProvider(fb.auth);
+                    // Send verification email.
+                    await fb.sendEmailVerification(user);
 
 
-                    const verificationId =
-                        await provider.verifyPhoneNumber(
-                            {
-                                phoneNumber: phone,
-                                session: createdUser
-                            },
-                            verifier
-                        );
-
-
-                    const otp =
-                        prompt(
-                            'OTP sent to ' + phone +
-                            '. Enter the 6-digit OTP:'
-                        );
-
-
-                    if (!otp) {
-
-                        await createdUser.delete();
-
-                        throw new Error(
-                            'Registration cancelled because OTP was not entered.'
-                        );
-                    }
-
-
-                    const phoneCredential =
-                        fb.PhoneAuthProvider.credential(
-                            verificationId,
-                            otp.trim()
-                        );
-
-
-                    // STEP 3:
-                    // Link mobile + email into one Firebase account.
-                    await fb.linkWithCredential(
-                        createdUser,
-                        phoneCredential
-                    );
-
-
-                    // STEP 4:
-                    // Save profile information in Firestore.
+                    // Save the mobile number as profile information.
+                    // It is NOT used for Firebase Phone Authentication.
                     await fb.setDoc(
                         fb.doc(
                             fb.db,
                             'users',
-                            createdUser.uid
+                            user.uid
                         ),
                         {
-                            uid: createdUser.uid,
+                            uid: user.uid,
                             name: name,
                             email: email,
                             phone: phone,
+                            emailVerified: false,
                             createdAt: fb.serverTimestamp()
                         },
                         {
@@ -2022,36 +1901,28 @@
                     );
 
 
-                    window.registeredUser = {
-                        uid: createdUser.uid,
-                        name: name,
-                        email: email,
-                        phone: phone
-                    };
+                    await fb.signOut(fb.auth);
 
 
                     alert(
-                        'Registration successful! Your account is now registered with both Email and Mobile.'
+                        'Registration successful! A verification link has been sent to ' +
+                        email +
+                        '. Please verify your email and then login with Email + Password.'
                     );
 
 
-                    showLogin();
-
-
-                    // Do not require registration again.
-                    document.querySelector(
-                        '#register-form'
+                    document.getElementById(
+                        'register-form'
                     ).reset();
 
+                    showLogin();
 
                 } catch (error) {
 
                     console.error('Registration error:', error);
 
-
                     let message =
-                        'Registration failed. Please try again.';
-
+                        'Registration failed.';
 
                     if (error.code === 'auth/email-already-in-use') {
 
@@ -2059,35 +1930,34 @@
                             'This email is already registered. Please login instead.';
 
                     } else if (
-                        error.code === 'auth/credential-already-in-use' ||
-                        error.code === 'auth/phone-number-already-in-use'
+                        error.code === 'auth/operation-not-allowed'
                     ) {
 
                         message =
-                            'This mobile number is already registered. Please login instead.';
+                            'Firebase Email/Password Authentication is disabled. Enable Email/Password in Firebase Console → Authentication → Sign-in method.';
 
                     } else if (
-                        error.code === 'auth/invalid-verification-code'
+                        error.code === 'auth/unauthorized-domain'
                     ) {
 
                         message =
-                            'Wrong OTP. Please try registration again.';
+                            'This website domain is not authorized in Firebase. Add the domain under Firebase Console → Authentication → Settings → Authorized domains.';
 
-                    } else if (
-                        error.code === 'auth/invalid-phone-number'
-                    ) {
+                    } else if (error.code === 'auth/invalid-email') {
 
                         message =
-                            'Invalid mobile number.';
+                            'The email address is invalid.';
 
-                    } else if (
-                        error.message &&
-                        error.message.includes('Registration cancelled')
-                    ) {
+                    } else if (error.code === 'auth/weak-password') {
 
-                        message = error.message;
+                        message =
+                            'Password must be at least 6 characters.';
+
+                    } else if (error.message) {
+
+                        message =
+                            'Registration failed: ' + error.message;
                     }
-
 
                     alert(message);
 
@@ -2104,13 +1974,9 @@
         // ============================================================
         // LOGIN
         //
-        // EMAIL:
-        //   Email + Password
-        //
-        // MOBILE:
-        //   Mobile + OTP
-        //
-        // Firebase makes this work from any device.
+        // Phone login / OTP has been removed.
+        // Login is now Email + Password only.
+        // This eliminates Firebase Phone Auth configuration errors.
         // ============================================================
 
         document.getElementById('login-form')
@@ -2118,137 +1984,77 @@
 
                 e.preventDefault();
 
-
                 const identifier =
                     document.getElementById('login-identifier')
                         .value
-                        .trim();
-
+                        .trim()
+                        .toLowerCase();
 
                 const password =
                     document.getElementById('login-password').value;
 
-
                 if (!identifier) {
-
-                    alert('Enter your registered Email or Mobile Number.');
+                    alert('Enter your registered Email Address.');
                     return;
                 }
 
+                if (!isEmail(identifier)) {
+                    alert('Please login using your registered Email Address.');
+                    return;
+                }
+
+                if (!password) {
+                    alert('Enter your password.');
+                    return;
+                }
 
                 const fb = window.firebaseAuth;
 
                 if (!fb) {
-
-                    alert(
-                        'Firebase is still loading. Please try again.'
-                    );
-
+                    alert('Firebase is still loading. Please try again.');
                     return;
                 }
-
 
                 const button =
                     document.querySelector(
                         '#login-form button[type="submit"]'
                     );
 
-
                 if (button) {
                     button.disabled = true;
                     button.textContent = 'Logging in...';
                 }
 
-
                 try {
 
-                    // ------------------------------------------------
-                    // EMAIL LOGIN
-                    // ------------------------------------------------
-
-                    if (isEmail(identifier)) {
-
-                        if (!password) {
-
-                            alert('Enter your password.');
-                            return;
-                        }
+                    const result =
+                        await fb.signInWithEmailAndPassword(
+                            fb.auth,
+                            identifier,
+                            password
+                        );
 
 
-                        const result =
-                            await fb.signInWithEmailAndPassword(
-                                fb.auth,
-                                identifier.toLowerCase(),
-                                password
-                            );
+                    // Require email verification.
+                    if (!result.user.emailVerified) {
 
+                        await fb.sendEmailVerification(
+                            result.user
+                        );
 
-                        await loadCloudProfile(result.user);
-
-
-                        showLoginToast();
-
-                        setTimeout(function () {
-                            loadDashboard();
-                        }, 300);
-
-
-                        return;
-                    }
-
-
-                    // ------------------------------------------------
-                    // MOBILE LOGIN
-                    // ------------------------------------------------
-
-                    const phone =
-                        normalizeIndianPhone(identifier);
-
-
-                    if (!/^\+91[6-9]\d{9}$/.test(phone)) {
+                        await fb.signOut(fb.auth);
 
                         alert(
-                            'Enter a valid registered Email or Indian Mobile Number.'
+                            'Please verify your email first. A new verification link has been sent to ' +
+                            identifier +
+                            '.'
                         );
 
                         return;
                     }
-
-
-                    // Password is NOT required for mobile login.
-                    // Firebase sends a secure OTP to the registered phone.
-                    const verifier =
-                        window.createFirebaseRecaptcha();
-
-
-                    const confirmation =
-                        await fb.signInWithPhoneNumber(
-                            fb.auth,
-                            phone,
-                            verifier
-                        );
-
-
-                    const otp =
-                        prompt(
-                            'OTP sent to ' + phone +
-                            '. Enter the 6-digit OTP:'
-                        );
-
-
-                    if (!otp) {
-                        return;
-                    }
-
-
-                    const result =
-                        await confirmation.confirm(
-                            otp.trim()
-                        );
 
 
                     await loadCloudProfile(result.user);
-
 
                     showLoginToast();
 
@@ -2256,15 +2062,12 @@
                         loadDashboard();
                     }, 300);
 
-
                 } catch (error) {
 
                     console.error('Login error:', error);
 
-
                     let message =
-                        'Login failed. Please check your details.';
-
+                        'Login failed. Please check your Email and Password.';
 
                     if (
                         error.code === 'auth/invalid-credential' ||
@@ -2276,27 +2079,24 @@
                             'Email or password is incorrect.';
 
                     } else if (
-                        error.code === 'auth/invalid-verification-code'
-                    ) {
-
-                        message =
-                            'Wrong OTP. Please try again.';
-
-                    } else if (
                         error.code === 'auth/too-many-requests'
                     ) {
 
                         message =
-                            'Too many attempts. Please wait and try again later.';
+                            'Too many login attempts. Please wait and try again later.';
 
                     } else if (
-                        error.code === 'auth/invalid-phone-number'
+                        error.code === 'auth/operation-not-allowed'
                     ) {
 
                         message =
-                            'Invalid mobile number.';
-                    }
+                            'Firebase Email/Password Authentication is disabled. Enable it in Firebase Console.';
 
+                    } else if (error.message) {
+
+                        message =
+                            'Login failed: ' + error.message;
+                    }
 
                     alert(message);
 
@@ -2644,20 +2444,9 @@
             'DOMContentLoaded',
             function () {
 
-                // If Firebase finds an existing session,
-                // its onAuthStateChanged callback will open dashboard.
-                // Otherwise show login.
-                setTimeout(function () {
-
-                    if (
-                        !window.firebaseAuth ||
-                        !window.firebaseAuth.auth.currentUser
-                    ) {
-
-                        showLogin();
-                    }
-
-                }, 800);
+                // Always start on the login screen.
+                // A successful login explicitly opens the dashboard.
+                showLogin();
             }
         );
 
